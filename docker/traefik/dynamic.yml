@@ -1,0 +1,42 @@
+# =============================================================================
+# Traefik — configuration dynamique (TLS, en-têtes de sécurité, compression)
+# =============================================================================
+http:
+  middlewares:
+    primetv-security:
+      headers:
+        stsSeconds: 31536000
+        stsIncludeSubdomains: true
+        contentTypeNosniff: true
+        frameDeny: false
+        customFrameOptionsValue: SAMEORIGIN
+        referrerPolicy: strict-origin-when-cross-origin
+        permissionsPolicy: "geolocation=(), microphone=(), camera=()"
+    primetv-compress:
+      compress:
+        minResponseBodyBytes: 1024
+
+  routers:
+    primetv-http:
+      rule: Host(`${TRAEFIK_DOMAIN:-primetv.localhost}`)
+      entryPoints: [web]
+      middlewares: [primetv-security, primetv-compress]
+      service: primetv
+      tls: {}
+
+  services:
+    primetv:
+      loadBalancer:
+        servers:
+          - url: http://nginx:80
+
+tls:
+  options:
+    default:
+      minVersion: VersionTLS12
+      sniStrict: false
+      cipherSuites:
+        - TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384
+        - TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305
+        - TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305

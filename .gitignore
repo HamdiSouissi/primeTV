@@ -1,0 +1,50 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+.coverage.xml
+
+# ---- Node ----
+node_modules/
+web/dist/
+web/.vite/
+coverage/
+*.tsbuildinfo
+
+# ---- Flutter / Dart ----
+mobile/.dart_tool/
+mobile/.flutter-plugins
+mobile/.flutter-plugins-dependencies
+mobile/build/
+mobile/pubspec.lock
+mobile/android/.gradle/
+mobile/android/local.properties
+mobile/ios/Pods/
+
+# ---- Données locales / secrets ----
+.env
+.env.local
+*.db
+*.sqlite3
+data/
+backups/
+logs/
+*.log
+primetv_local.db
+
+# ---- Divers ----
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Certificats locaux générés automatiquement
+docker/nginx/certs/*
+!docker/nginx/certs/README.md
