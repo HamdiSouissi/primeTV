@@ -25,6 +25,9 @@ TRAEFIK_DOMAIN=tv.example.com TRAEFIK_ACME_EMAIL=admin@example.com \
 Prérequis DNS : `A tv.example.com → IP du serveur` ; ports **80** et **443** ouverts
 (le challenge HTTP-01 de Let's Encrypt utilise le port 80).
 
+Le service `nginx` est **construit depuis `docker/nginx/Dockerfile`** (configuration et script de
+certificat embarqués, `openssl` inclus, `nginx -t` exécuté au build) : pensez à
+`docker compose build nginx` après toute modification de `docker/nginx/*.conf`.
 Le service `nginx` reste l'entrée interne (Traefik → nginx:80) : sécurité, gzip, limites de débit
 et routage `/api`, `/docs`, SPA/PWA restent centralisés.
 

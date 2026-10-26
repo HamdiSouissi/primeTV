@@ -28,10 +28,62 @@ docker compose up -d
 ### `SECRET_KEY doit contenir au moins 16 caractères`
 Valeur trop courte : `openssl rand -base64 48`.
 
+### Nginx : `/docker-entrypoint.d/10-primetv-cert.sh: not found`
+### Backend : `env: use -[v]S to pass options in shebang lines`
+
+**Cause** : fins de ligne **CRLF** (checkout Git sous Windows). Le noyau lit le shebang
+avec un retour chariot (`#!/bin/sh\r`) et ne trouve pas l'interpréteur. Symptômes jumeaux :
+nginx redémarre en boucle, le backend ne démarre jamais.
+
+**Correctif immédiat** (sans re-cloner) :
+
+```bash
+./scripts/fix-line-endings.sh                # convertit CRLF → LF
+git config core.autocrlf input               # évite la récidive
+docker compose build --no-cache backend nginx web
+docker compose up -d
+```
+
+Le dépôt contient un `.gitattributes` (`* text=auto eol=lf`) : après
+`git add --renormalize . && git commit`, un clone neuf est correct.
+Les images `backend` et `nginx` retirent de toute façon les `\r` à la construction
+(`sed -i 's/\r$//'`), la reconstruction suffit donc dans la majorité des cas.
+
+Sous **PowerShell** (sans Git Bash), équivalent :
+
+```powershell
+Get-ChildItem -Recurse -File -Include *.sh,*.conf,Dockerfile,docker-entrypoint.sh |
+  ForEach-Object {
+    $c = Get-Content $_.FullName -Raw
+    if ($c -match "`r`n") { Set-Content -NoNewline -Encoding utf8 $_.FullName ($c -replace "`r`n", "`n") }
+  }
+```
+
+Vérification :
+
+```bash
+./scripts/fix-line-endings.sh --check        # code 0 = tout est en LF
+docker compose logs --tail=30 nginx backend
+```
+
 ### Nginx redémarre en boucle (TLS)
-Certificat absent et `openssl` indisponible dans l'image : vérifiez
-`docker compose logs nginx`, supprimez `docker/nginx/certs/*` et relancez
-(`docker compose restart nginx` régénère un certificat auto-signé).
+Le certificat n'a pas pu être généré. Depuis la version 1.0.1, l'image `nginx` est
+construite depuis `docker/nginx/Dockerfile` et **embarque `openssl`** ainsi que le
+script de génération ; supprimez les certificats et relancez :
+
+```bash
+rm -f docker/nginx/certs/primetv.crt docker/nginx/certs/primetv.key
+docker compose up -d --build nginx
+docker compose logs nginx | grep primetv
+```
+
+La configuration est validée à la construction (`nginx -t`) : une erreur de syntaxe
+fait échouer le build, pas le démarrage.
+
+### `/nginx-health` renvoie 200 mais `/healthz` échoue
+`/nginx-health` teste **uniquement le proxy** ; `/healthz` teste la pile complète
+(API → base de données). Si `/healthz` échoue, inspectez `docker compose logs backend`
+et l'état de `postgres`.
 
 ### L'interface affiche « Serveur injoignable »
 * L'API doit être joignable **via la même origine** : Nginx/Vite doit proxifier `/api`.

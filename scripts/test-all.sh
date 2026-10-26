@@ -6,6 +6,15 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 cd "$ROOT_DIR"
 
+echo "== Hygiène : fins de ligne LF =="
+./scripts/fix-line-endings.sh --check
+
+echo "== Shell : syntaxe =="
+for script in scripts/*.sh tests/api/smoke.sh docker/nginx/10-generate-cert.sh backend/docker-entrypoint.sh; do
+  sh -n "$script" 2>/dev/null || bash -n "$script"
+  echo "  ✓ $script"
+done
+
 echo "== Backend : lint =="
 (cd backend && .venv/bin/ruff check app tests)
 

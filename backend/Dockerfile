@@ -33,7 +33,12 @@ WORKDIR ${APP_HOME}
 COPY --from=builder /opt/venv /opt/venv
 COPY --chown=primetv:primetv app ./app
 COPY --chown=primetv:primetv docker-entrypoint.sh ./docker-entrypoint.sh
-RUN chmod +x ./docker-entrypoint.sh && mkdir -p /app/data && chown -R primetv:primetv /app
+# `sed 's/\r$//'` : sur un checkout Windows (CRLF), le noyau lit « #!/usr/bin/env sh\r »
+# et échoue avec « env: use -[v]S to pass options in shebang lines ».
+RUN sed -i 's/\r$//' ./docker-entrypoint.sh \
+    && chmod 0755 ./docker-entrypoint.sh \
+    && mkdir -p /app/data \
+    && chown -R primetv:primetv /app
 
 USER primetv
 EXPOSE 8000

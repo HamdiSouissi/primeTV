@@ -19,6 +19,12 @@ PrimeTV est une **application web unique** (installable en PWA) : aucun SDK mobi
 
 Ports par défaut : **8080** (HTTP), **8443** (HTTPS), **80/443** si profil Traefik.
 
+> **Windows** : clonez avec `git config --global core.autocrlf input` (ou lancez
+> `./scripts/fix-line-endings.sh` après le clone). Sans cela, les scripts des conteneurs
+> arrivent en CRLF et Docker échoue avec
+> `10-primetv-cert.sh: not found` (nginx) ou `env: use -[v]S to pass options in shebang lines`
+> (backend). Voir [TROUBLESHOOTING.md](TROUBLESHOOTING.md).
+
 ---
 
 ## 2. Installation Docker (Linux, macOS, Windows + WSL2)
@@ -88,6 +94,11 @@ curl -s localhost:8080/healthz | jq
 ```
 
 Attendu : conteneurs `postgres`, `redis`, `backend`, `web`, `nginx` en `healthy`.
+
+```bash
+curl -s localhost:8080/nginx-health   # ok        (proxy seul)
+curl -s localhost:8080/healthz        # {"status":"ok",...} (pile complète)
+```
 
 ---
 

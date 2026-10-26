@@ -194,6 +194,12 @@ jobs:
     timeout-minutes: 5
     steps:
       - uses: actions/checkout@v4
+      - name: Vérifier les fins de ligne (LF)
+        run: |
+          ./scripts/fix-line-endings.sh --check
+          sh -n docker/nginx/10-generate-cert.sh
+          sh -n backend/docker-entrypoint.sh
+          echo "scripts conteneurs valides"
       - name: Valider docker-compose.yml
         run: |
           cp .env.example .env

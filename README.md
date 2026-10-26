@@ -191,6 +191,7 @@ primeTV/
 ├── docker-compose.yml
 ├── .env.example
 ├── CONTRIBUTING.md               # guide de contribution
+├── .gitattributes                # fins de ligne LF forcées (Windows/CRLF)
 ├── LICENSE (MIT)
 ├── Makefile
 └── README.md
@@ -328,6 +329,7 @@ cd web && npm run test                               # 12 tests
 | `scripts/restore.sh` | Restauration (`--latest` ou fichier) avec confirmation |
 | `scripts/dev.sh` | API + Vite en local |
 | `scripts/healthcheck.sh` | Vérifie API, docs, web, manifeste PWA, conteneurs |
+| `scripts/fix-line-endings.sh` | Convertit les CRLF en LF (checkout Windows) et valide les scripts |
 | `scripts/test-all.sh` | Toute la suite de tests |
 | `scripts/gen-self-signed-cert.sh` | Certificat TLS local |
 | `make help` | Raccourcis Makefile |
