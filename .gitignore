@@ -32,6 +32,9 @@ mobile/ios/Pods/
 .env
 .env.local
 *.db
+*.db-shm
+*.db-wal
+*.db-journal
 *.sqlite3
 data/
 backups/
