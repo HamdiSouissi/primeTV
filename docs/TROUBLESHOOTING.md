@@ -66,6 +66,33 @@ Vérification :
 docker compose logs --tail=30 nginx backend
 ```
 
+### Build nginx : `host not found in upstream "backend:8000"`
+Le `nginx -t` exécuté **pendant la construction de l'image** tente de résoudre les
+amonts Docker Compose — impossibles à résoudre hors du réseau `primetv_net`.
+
+Depuis la version 1.0.1 de `docker/nginx/Dockerfile`, la validation porte sur une
+copie de la configuration où `backend:8000` et `web:80` sont remplacés par des
+adresses locales : la syntaxe, les `location`, les modules et les certificats sont
+vérifiés, sans dépendre du DNS Docker. Si vous voyez encore ce message :
+
+```bash
+git pull
+docker compose build --no-cache nginx
+docker compose up -d
+```
+
+### Erreur 502 juste après un `docker compose up -d backend`
+Nginx résout le nom `backend` **au démarrage** et conserve l'adresse IP obtenue.
+Si le conteneur backend est **recréé** (nouvelle IP), rechargez le proxy :
+
+```bash
+docker compose restart nginx
+```
+
+`docker compose up -d` recrée nginx automatiquement lorsque sa configuration a changé.
+Les dépendances `service_healthy` garantissent par ailleurs que `backend` et `web`
+répondent avant le lancement de Nginx.
+
 ### Nginx redémarre en boucle (TLS)
 Le certificat n'a pas pu être généré. Depuis la version 1.0.1, l'image `nginx` est
 construite depuis `docker/nginx/Dockerfile` et **embarque `openssl`** ainsi que le

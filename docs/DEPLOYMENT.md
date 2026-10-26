@@ -27,7 +27,9 @@ Prérequis DNS : `A tv.example.com → IP du serveur` ; ports **80** et **443** 
 
 Le service `nginx` est **construit depuis `docker/nginx/Dockerfile`** (configuration et script de
 certificat embarqués, `openssl` inclus, `nginx -t` exécuté au build) : pensez à
-`docker compose build nginx` après toute modification de `docker/nginx/*.conf`.
+`docker compose build nginx` après toute modification de `docker/nginx/*.conf`. La
+configuration est validée au build sur une copie neutralisant les amonts Docker
+(`backend:8000`/`web:80` ne sont pas résolubles dans un `docker build`).
 Le service `nginx` reste l'entrée interne (Traefik → nginx:80) : sécurité, gzip, limites de débit
 et routage `/api`, `/docs`, SPA/PWA restent centralisés.
 

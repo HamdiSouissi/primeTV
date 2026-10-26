@@ -207,3 +207,39 @@ jobs:
           sed -i 's/^SECRET_KEY=.*/SECRET_KEY=ci-secret-key-not-for-production/' .env
           docker compose config --quiet
           echo "compose valide"
+
+  images:
+    name: Docker · build des images + validation Nginx
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - name: Construire l'image nginx
+        run: docker build -t primetv/nginx:ci ./docker/nginx
+      - name: Valider la configuration Nginx réelle (hors build)
+        # Les amonts `backend`/`web` sont simulés par --add-host : c'est
+        # exactement la configuration utilisée en production qui est testée.
+        run: |
+          docker run --rm --add-host backend:127.0.0.1 --add-host web:127.0.0.1 \
+            primetv/nginx:ci nginx -t
+      - name: Vérifier que le conteneur démarre et répond sur /nginx-health
+        run: |
+          docker run -d --name nginx-ci --add-host backend:127.0.0.1 --add-host web:127.0.0.1 \
+            -p 8080:80 primetv/nginx:ci
+          for i in $(seq 1 20); do
+            if curl -fsS http://127.0.0.1:8080/nginx-health >/dev/null 2>&1; then
+              echo "nginx répond après ${i}s"; break
+            fi
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:8080/nginx-health
+          docker logs nginx-ci | tail -20
+          docker rm -f nginx-ci
+      - name: Construire les images backend et web
+        run: |
+          docker build -t primetv/backend:ci ./backend
+          docker build -t primetv/web:ci ./web
+      - name: Vérifier le point d'entrée du backend dans l'image
+        run: |
+          docker run --rm --entrypoint /bin/sh primetv/backend:ci -c \
+            'head -1 ./docker-entrypoint.sh && test -x ./docker-entrypoint.sh && echo "entrypoint exécutable et sans CRLF"'

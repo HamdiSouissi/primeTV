@@ -109,7 +109,7 @@ services:
     build:
       context: ./docker/nginx
       dockerfile: Dockerfile
-    image: primetv/nginx:1.0.0
+    image: primetv/nginx:1.0.1
     <<: *restart
     volumes:
       # Seuls les certificats sont persistés sur l'hôte (générés au 1er démarrage).
@@ -120,8 +120,10 @@ services:
       - "${HTTP_PORT:-8080}:80"
       - "${HTTPS_PORT:-8443}:443"
     depends_on:
+      # `service_healthy` : Nginx résout `backend`/`web` UNE FOIS au démarrage ;
+      # les conteneurs doivent donc exister et répondre avant son lancement.
       web:
-        condition: service_started
+        condition: service_healthy
       backend:
         condition: service_healthy
     labels:
