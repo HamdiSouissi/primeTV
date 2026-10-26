@@ -71,7 +71,7 @@ https://test-streams.mux.dev/test_001/stream.m3u8
 
 # --- Religion (démonstration de catégorisation uniquement) -------------------
 #EXTINF:-1 tvg-id="demo.religion" tvg-name="PrimeTV Demo Religion" group-title="Religion" tvg-language="Arabic" tvg-category="Religion",PrimeTV Demo Religion
-https://test-streams.mux.dev/x36xhzz/x36xhzz.m3u8
+https://devstreaming-cdn.apple.com/videos/streaming/examples/img_bipbop_adv_example_ts/master.m3u8
 
 # --- Chiffrement AES-128 -----------------------------------------------------
 # Entrée pédagogique : manifeste HLS chiffré AES-128 avec une clé PUBLIQUE de
