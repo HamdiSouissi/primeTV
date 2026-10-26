@@ -4,8 +4,8 @@
 
 ```
 ┌───────────────────────┐   ┌───────────────────────┐   ┌───────────────────────┐
-│  React SPA (web/)     │   │  Flutter (mobile/)    │   │  Swagger / Postman    │
-│  Vite · TS · Tailwind │   │  Android + Web        │   │  (clients API)        │
+│  React SPA + PWA      │   │  Clients API tiers    │   │  Swagger / Postman    │
+│  Vite · TS · Tailwind │   │  (mobile, scripts)    │   │  (clients API)        │
 └──────────┬────────────┘   └──────────┬────────────┘   └──────────┬────────────┘
            │  HTTPS (même origine)     │                            │
            └───────────────┬───────────┴────────────────────────────┘
@@ -47,7 +47,7 @@
 | **UUID CHAR(36)** | Portable SQLite/PostgreSQL, pas de fuite d'énumération d'identifiants. |
 | **Proxy de lecture** | Corrige CORS, réécrit les manifestes (segments/clés/sous-titres), évite d'exposer des tokens au navigateur. |
 | **hls.js + dash.js** | Lecteurs libres, matures, qualité manuelle et sous-titres. |
-| **Flutter** | Une base de code Android + Web, lecteur natif ExoPlayer (HLS/DASH). |
+| **PWA** (service worker + manifeste) | Une seule base de code web ; installation native-like, cache de l'app shell et page hors ligne sans store ni APK. |
 | **TailwindCSS** | Design system cohérent, dark mode natif, aucun CSS runtime propriétaire. |
 
 ## 3. Pipeline d'import

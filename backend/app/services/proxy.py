@@ -28,7 +28,7 @@ class ProxyContext:
 def proxy_url(url: str, channel_id: str | None = None) -> str:
     """Construit l'URL (relative) du proxy pour une ressource.
 
-    Le chemin est relatif à l'origine de l'API : le web, l'app Android et Nginx
+    Le chemin est relatif à l'origine de l'API : la web app et Nginx
     fonctionnent ainsi en même-origine, sans dépendre d'un nom d'hôte.
     """
     path = f"{settings.API_V1_PREFIX}/streams/proxy?url={quote(url, safe='')}"

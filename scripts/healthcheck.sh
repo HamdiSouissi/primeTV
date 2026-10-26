@@ -21,7 +21,7 @@ check "API (healthz)" "$BASE_URL/healthz"
 check "API détaillée" "$BASE_URL/api/v1/healthz"
 check "Documentation" "$BASE_URL/docs"
 check "Interface web" "$BASE_URL/"
-check "App Flutter Web" "$BASE_URL/mobile/"
+check "Manifeste PWA" "$BASE_URL/manifest.webmanifest"
 
 echo "== Conteneurs =="
 docker compose ps || true

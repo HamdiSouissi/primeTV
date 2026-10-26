@@ -39,15 +39,10 @@ python3 -m venv .venv
 cp ../.env.example ../.env           # renseigner SECRET_KEY / POSTGRES_PASSWORD
 SEED_DEMO_DATA=true .venv/bin/uvicorn app.main:app --reload --port 8000
 
-# Frontend (Node ≥ 20)
+# Frontend (Node ≥ 20) — application web unique
 cd web
 npm install
 npm run dev                          # http://localhost:5173, proxy /api → :8000
-
-# Mobile (Flutter ≥ 3.22)
-cd mobile
-flutter pub get
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
 ```
 
 Comptes de démonstration : `admin@primetv.io` / `PrimeTV#2026` (créé uniquement si
@@ -72,14 +67,11 @@ web/src/
 ├── pages/          # une page = une route
 ├── store/          # zustand (auth, ui, toast)
 └── test/           # tests Vitest + Testing Library
-mobile/lib/
-├── core/           # config, client HTTP, stockage sécurisé
-├── models/         # modèles Dart (fromJson/toJson)
-├── screens/        # écrans (login, dashboard, chaînes, favoris, sources, lecteur, réglages)
-├── services/       # ApiService (un point d'entrée HTTP)
-├── state/          # AppState (ChangeNotifier)
-├── theme/          # thème Material 3 sombre/clair
-└── widgets/        # composants partagés
+web/public/
+├── manifest.webmanifest  # métadonnées PWA (nom, icônes, raccourcis)
+├── sw.js                 # service worker (app shell, hors ligne)
+├── offline.html          # page de repli hors connexion
+└── icons/                # icônes générées par scripts/generate-icons.py
 ```
 
 ## 5. Style de code
@@ -101,11 +93,12 @@ mobile/lib/
 * Les états serveur passent par **react-query** ; l'état global par **zustand**.
 * Textes d'interface en français, accessibilité (labels, `aria-*`, focus visible).
 
-### Dart / Flutter
+### PWA
 
-* `flutter_lints`, `const` dès que possible, `SingleChildScrollView` pour les formulaires.
-* Les modèles sont immuables (`final`) avec `fromJson` tolérant (valeurs nulles).
-* Le réseau passe exclusivement par `ApiService`.
+* Toute ressource ajoutée à l'app shell doit être listée dans `SHELL_ASSETS` (`public/sw.js`).
+* Incrémentez `VERSION` dans `sw.js` lors d'un changement de stratégie de cache.
+* Ne mettez **jamais** en cache `/api/**` ni les flux vidéo (données privées/temps réel).
+* Le service worker est enregistré en production uniquement (`src/lib/pwa.ts`).
 
 ### Git
 
@@ -130,7 +123,6 @@ chore(ci): ajoute le job compose
 
 cd backend && .venv/bin/ruff check app tests && .venv/bin/pytest -q
 cd web && npm run lint && npm run test && npm run build
-cd mobile && flutter analyze && flutter test
 BASE_URL=http://localhost:8000 ./tests/api/smoke.sh
 ```
 

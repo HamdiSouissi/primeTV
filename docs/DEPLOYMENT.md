@@ -26,7 +26,7 @@ Prérequis DNS : `A tv.example.com → IP du serveur` ; ports **80** et **443** 
 (le challenge HTTP-01 de Let's Encrypt utilise le port 80).
 
 Le service `nginx` reste l'entrée interne (Traefik → nginx:80) : sécurité, gzip, limites de débit
-et routage `/api`, `/mobile`, `/docs` restent centralisés.
+et routage `/api`, `/docs`, SPA/PWA restent centralisés.
 
 ### Traefik sans `--profile`
 
@@ -50,27 +50,39 @@ labels:
 * Nginx d'entrée : reprenez `docker/nginx/nginx.conf` en remplaçant les `upstream` par
   `127.0.0.1:8000` (API) et le chemin de `dist`.
 * systemd : unités `primetv-api` + `nginx` (exemple dans [INSTALL.md](INSTALL.md#34-systemd-exemple-backend)).
-* Flutter Web : `flutter build web --base-href /mobile/ --dart-define=API_BASE_URL=/api/v1`.
 
-## 4. Signature Android
+## 4. Application web (PWA) en production
+
+Le front-end est un **unique** conteneur Nginx (`web/`) qui sert le build Vite :
 
 ```bash
-keytool -genkeypair -v -keystore ~/primetv-release.jks -keyalg RSA \
-  -keysize 2048 -validity 10000 -alias primetv
+docker compose build web && docker compose up -d web
+# ou sans Docker :
+cd web && npm ci && npm run build        # → web/dist servi par votre Nginx
 ```
 
-`mobile/android/key.properties` (jamais versionné) :
+Points à vérifier :
 
-```properties
-storePassword=***
-keyPassword=***
-keyAlias=primetv
-storeFile=/home/user/primetv-release.jks
+| Élément | Attendu |
+|---|---|
+| `GET /manifest.webmanifest` | `Content-Type: application/manifest+json` |
+| `GET /sw.js` | `Cache-Control: no-cache` + `Service-Worker-Allowed: /` |
+| `/assets/*` | `Cache-Control: public, immutable` (fichiers hachés) |
+| `index.html` | `no-cache, must-revalidate` |
+| Fallback SPA | `try_files $uri $uri/ /index.html` (sinon 404 au rechargement d'une route) |
+| **HTTPS** | obligatoire pour l'installation et le service worker |
+
+Le service worker ne met jamais en cache `/api/**` ni les flux vidéo : rien à purger
+côté CDN, mais **n'exposez pas** les réponses API à un cache partagé.
+
+Après un déploiement, les clients reçoivent la nouvelle version au prochain chargement
+(le `sw.js` est revalidé systématiquement). En cas de doute :
+
+```bash
+curl -sI https://tv.example.com/sw.js | grep -i cache-control
 ```
 
-`mobile/android/app/build.gradle` : remplacez `signingConfig = signingConfigs.debug` par
-votre `signingConfigs.release` (voir documentation Flutter « Build and release an Android app »).
-Ajoutez `key.properties` et `*.jks` au `.gitignore`.
+Procédure détaillée, stratégies de cache et limites : **[PWA.md](PWA.md)**.
 
 ## 5. Haute disponibilité & montée en charge
 
@@ -103,7 +115,8 @@ tv.example.com {
     handle /docs* {
         reverse_proxy 127.0.0.1:8080
     }
-    handle /mobile/* {
+    handle /sw.js {
+        header Cache-Control "no-cache"
         reverse_proxy 127.0.0.1:8080
     }
     handle {

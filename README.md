@@ -8,7 +8,7 @@ Playlists M3U/M3U8 · Xtream Codes · HLS/DASH · EPG XMLTV · 8 catégories · 
 [![Licence MIT](https://img.shields.io/badge/licence-MIT-3382fb.svg)](LICENSE)
 [![Backend](https://img.shields.io/badge/backend-FastAPI-009688.svg)](backend/)
 [![Frontend](https://img.shields.io/badge/frontend-React%20%2B%20TypeScript-61dafb.svg)](web/)
-[![Mobile](https://img.shields.io/badge/mobile-Flutter-02569B.svg)](mobile/)
+[![PWA](https://img.shields.io/badge/PWA-installable-5A0FC8.svg)](public/sw.js)
 [![Docker](https://img.shields.io/badge/docker-compose-2496ED.svg)](docker-compose.yml)
 [![Tests](https://img.shields.io/badge/tests-backend%2033%20%2B%20frontend%2012-22c55e.svg)](#-tests)
 
@@ -48,8 +48,8 @@ Playlists M3U/M3U8 · Xtream Codes · HLS/DASH · EPG XMLTV · 8 catégories · 
 | **Favoris / Historique** | Ajout/suppression, synchronisation multi-appareils, **continuer la lecture**, dernières chaînes |
 | **Scan** | Bouton **scan/actualisation** : test HTTP concurrent des flux, analyse des manifestes, détection **AES-128 / ClearKey / DRM**, mise à jour qualité, statut et logos |
 | **Chaînes chiffrées** | Badge explicite, clés **ClearKey** saisies par l'utilisateur, proxy de clés ; DRM signalé et bloqué (voir avertissement) |
-| **Interface** | React 18 + TypeScript + Tailwind, **dark/light**, responsive, Material-like, animations, squelettes de chargement, PWA-ready |
-| **Android** | Application **Flutter** (Material 3) : login JWT, catalogue, favoris, lecteur, sources, profils, thème |
+| **Interface** | React 18 + TypeScript + Tailwind, **dark/light**, responsive (téléphone → 4K), animations, squelettes de chargement |
+| **Web app / PWA** | **Application web unique et installable** : manifeste, service worker (mode hors ligne), raccourcis, icônes, ajout à l'écran d'accueil Android/iOS et installation desktop — aucun store, aucun APK |
 | **Backend** | **FastAPI** (Python 3.11+), SQLAlchemy 2, PostgreSQL 16, Redis 7, JWT, rate limiting, validation Pydantic, logs JSON |
 | **Docs** | **Swagger UI** (`/docs`), ReDoc, OpenAPI JSON, 9 guides Markdown |
 | **Ops** | Docker Compose, Nginx (HTTP/2, gzip, TLS), Traefik (Let's Encrypt), healthchecks, scripts install/update/backup/restore, CI GitHub Actions |
@@ -68,10 +68,10 @@ Playlists M3U/M3U8 · Xtream Codes · HLS/DASH · EPG XMLTV · 8 catégories · 
                         ┌──────────────▼───────────────────────────────┐
                         │   Nginx (HTTP/2, gzip, TLS) — ou Traefik     │
                         └───────┬───────────────────────────┬──────────┘
-                                │ /                         │ /api /docs
+                                │ /  (SPA + PWA)            │ /api /docs
                   ┌─────────────▼───────────┐     ┌─────────▼──────────────┐
-                  │  Flutter Web (/mobile)  │     │  FastAPI (Gunicorn)    │
-                  │  Android (APK)          │     │  JWT · Rate-limit      │
+                  │  React SPA + service     │     │  FastAPI (Gunicorn)    │
+                  │  worker (PWA installable)│     │  JWT · Rate-limit      │
                   └─────────────────────────┘     │  Services :            │
                                                   │   parseur M3U/XMLTV    │
                                                   │   classifieur          │
@@ -91,7 +91,7 @@ classifieur (catégorie, langue, qualité, priorité, bouquets) → upsert idemp
 EPG détecté → sources XMLTV enregistrées.
 
 **Flux de lecture** : `/channels/{id}/play` → descripteur (URL proxifiée, type, variantes, DRM, clés) →
-lecteur (hls.js/dash.js/video_player) → proxy `/streams/proxy` qui réécrit les manifestes et relaie
+lecteur web (hls.js / dash.js / <video>) → proxy `/streams/proxy` qui réécrit les manifestes et relaie
 segments + clés → reprise de lecture enregistrée dans l'historique du profil.
 
 ---
@@ -99,7 +99,8 @@ segments + clés → reprise de lecture enregistrée dans l'historique du profil
 ## 🚀 Démarrage rapide
 
 ### Prérequis
-* Docker ≥ 24 et Docker Compose v2 — **ou** Python 3.11+, Node 20+, Flutter 3.22+ pour le développement local.
+* Docker ≥ 24 et Docker Compose v2 — **ou** Python 3.11+ et Node 20+ pour le développement local.
+* Un navigateur moderne (Chrome/Edge/Firefox/Safari) : l'application est **100 % web**, installable en PWA.
 
 ### Installation en une commande
 
@@ -112,7 +113,7 @@ cd primeTV
 | Service | URL |
 |---|---|
 | Interface web | http://localhost:8080 |
-| Application Flutter (web) | http://localhost:8080/mobile/ |
+| Installation PWA | bouton **Installer** dans la barre supérieure (ou menu du navigateur) |
 | Documentation API (Swagger) | http://localhost:8080/docs |
 | Healthcheck | http://localhost:8080/healthz |
 
@@ -134,16 +135,21 @@ TRAEFIK_DOMAIN=tv.example.com TRAEFIK_ACME_EMAIL=vous@example.com \
 # Web   : http://localhost:5173
 ```
 
-### Application Android
+### Installer l'application (PWA)
 
-```bash
-cd mobile
-flutter pub get
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1   # émulateur
-flutter build apk --release --dart-define=API_BASE_URL=https://votre-domaine.tld/api/v1
-```
+PrimeTV est une **application web unique** : elle s'installe depuis le navigateur, sans store.
 
-> L'app se connecte à l'API PrimeTV : elle ne contient aucun flux. Voir [docs/INSTALL.md](docs/INSTALL.md#5-application-android).
+| Plateforme | Procédure |
+|---|---|
+| **Android** (Chrome, Edge, Samsung Internet) | ouvrir l'URL → bandeau **Installer** (ou ⋮ → « Installer l'application ») |
+| **iOS / iPadOS** (Safari) | Partager → **Sur l'écran d'accueil** |
+| **Windows / macOS / Linux** (Chrome, Edge) | icône **Installer** dans la barre d'adresse, ou bouton **Installer** de PrimeTV |
+| **Sans installation** | l'application fonctionne directement dans l'onglet |
+
+Une fois installée : plein écran sans barre d'adresse, icône dédiée, raccourcis « Chaînes / Sport /
+Guide / Favoris », et page « hors connexion » si le réseau tombe. Détails : **[docs/PWA.md](docs/PWA.md)**.
+
+> L'application ne contient aucun flux : elle se connecte à l'API PrimeTV (même origine).
 
 ---
 
@@ -169,20 +175,17 @@ primeTV/
 │   └── requirements.txt / pyproject.toml
 ├── web/                          # Frontend React + TS + Vite + Tailwind
 │   ├── src/{api,components,hooks,lib,pages,store,styles,test}
+│   ├── public/                   # manifeste PWA, service worker, icônes, page hors ligne
+│   ├── scripts/generate-icons.py # génération des icônes PWA (sans dépendance)
 │   ├── Dockerfile & nginx.conf
 │   └── package.json / vite.config.ts / tailwind.config.js
-├── mobile/                       # Application Flutter (Android + Web)
-│   ├── lib/{core,models,services,state,screens,widgets,theme}
-│   ├── android/                  # configuration Gradle + manifeste
-│   ├── test/                     # tests Dart
-│   └── Dockerfile                # build Flutter Web
 ├── docker/
 │   ├── nginx/                    # reverse proxy d'entrée (HTTP/2, TLS auto-signé)
 │   ├── traefik/                  # configuration dynamique + Let's Encrypt
 │   └── postgres/init.sql         # extensions PostgreSQL
 ├── scripts/                      # install, update, backup, restore, dev, healthcheck, tests, certificat
 ├── tests/api/smoke.sh            # tests API bout-en-bout (curl)
-├── docs/                         # 10 guides (installation, API, admin, sécurité…)
+├── docs/                         # 11 guides (installation, API, admin, sécurité…)
 ├── examples/                     # playlist M3U + EPG XMLTV de démonstration
 ├── .github/workflows/ci.yml      # CI (lint, tests, build, docker)
 ├── docker-compose.yml
@@ -304,14 +307,13 @@ Table complète commentée : **[docs/CONFIGURATION.md](docs/CONFIGURATION.md)**.
 |---|---|---|
 | Backend unitaire | pytest | parseur M3U/M3U8/HLS, XMLTV, classifieur, analyse DRM HLS/DASH |
 | Backend intégration | pytest + TestClient | auth/profils, imports, recherche/filtres/priorité, favoris, historique, EPG, scan, stats, proxy |
-| Frontend | Vitest + Testing Library | cartes de chaînes, lecteur (blocage DRM), formatage |
+| Frontend | Vitest + Testing Library | cartes de chaînes, lecteur (blocage DRM), formatage, PWA |
 | API bout-en-bout | bash + curl | parcours complet sur une instance démarrée |
-| CI | GitHub Actions | lint, tests, build web, smoke API, validation du compose |
+| CI | GitHub Actions | lint, tests, build web, smoke API, validation PWA & compose |
 
 ```bash
 cd backend && .venv/bin/python -m pytest -q          # 33 tests
 cd web && npm run test                               # 12 tests
-cd mobile && flutter test                            # tests Dart
 ```
 
 ---
@@ -325,7 +327,7 @@ cd mobile && flutter test                            # tests Dart
 | `scripts/backup.sh` | Dump PostgreSQL compressé + rotation (`KEEP_DAYS`) |
 | `scripts/restore.sh` | Restauration (`--latest` ou fichier) avec confirmation |
 | `scripts/dev.sh` | API + Vite en local |
-| `scripts/healthcheck.sh` | Vérifie API, docs, web, Flutter Web, conteneurs |
+| `scripts/healthcheck.sh` | Vérifie API, docs, web, manifeste PWA, conteneurs |
 | `scripts/test-all.sh` | Toute la suite de tests |
 | `scripts/gen-self-signed-cert.sh` | Certificat TLS local |
 | `make help` | Raccourcis Makefile |
@@ -343,6 +345,7 @@ cd mobile && flutter test                            # tests Dart
 | [Guide administrateur](docs/ADMIN_GUIDE.md) | Exploitants |
 | [Guide développeur](docs/DEVELOPER_GUIDE.md) | Contributeurs |
 | [Déploiement & production](docs/DEPLOYMENT.md) | DevOps |
+| [Application web & PWA](docs/PWA.md) | Tous |
 | [Sécurité & légalité](docs/SECURITY.md) | Tous |
 | [Architecture & schéma BDD](docs/ARCHITECTURE.md) | Dev |
 | [Dépannage](docs/TROUBLESHOOTING.md) | Tous |

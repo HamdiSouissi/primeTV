@@ -85,7 +85,7 @@ Par défaut, les chaînes **sportives** et **arabes** remontent en tête.
 * Cœur sur une carte = ajout/retrait immédiat.
 * Les favoris sont **propres à chaque profil** (compte adulte ≠ profil enfant).
 * Page **Favoris** → **Synchroniser** renvoie la liste actuelle au serveur (utile après plusieurs appareils).
-* App Android : onglet **Favoris**, même comportement.
+* Application installée (PWA) : onglet **Favoris**, même comportement.
 
 ---
 
@@ -134,14 +134,28 @@ détectée dans le manifeste (HD, FHD, 4K…).
 
 ---
 
-## 10. Application Android
+## 10. Installer l'application sur votre appareil (PWA)
 
-1. Installez l'APK fourni par votre administrateur (ou compilez-le, voir [INSTALL.md](INSTALL.md)).
-2. Renseignez l'URL de l'API si elle n'est pas intégrée : elle est fixée à la compilation
-   (`--dart-define=API_BASE_URL=…`).
-3. Onglets : **Accueil** (stats, sport, arabe, reprendre), **Chaînes** (recherche + filtres),
-   **Favoris**, **Sources** (import URL / coller M3U, scan), **Réglages** (profils, thème, déconnexion).
-4. Lecture : bouton plein écran, favori, clés ClearKey.
+PrimeTV est une application **web** : elle s'installe depuis le navigateur, sans store ni APK.
+
+| Appareil | Procédure |
+|---|---|
+| **Android** (Chrome, Edge, Samsung Internet) | ouvrir l'URL → bandeau **Installer** (ou ⋮ → « Installer l'application ») |
+| **iPhone / iPad** (Safari) | **Partager** → **Sur l'écran d'accueil** → **Ajouter** |
+| **Ordinateur** (Chrome, Edge) | icône **Installer** dans la barre d'adresse, ou bouton **Installer** de PrimeTV |
+
+Une fois installée :
+
+* l'application s'ouvre **en plein écran**, sans barre d'adresse ;
+* des raccourcis système donnent accès direct à **Chaînes**, **Sport**, **Guide TV** et **Favoris** ;
+* en cas de coupure réseau, une page « hors connexion » s'affiche et l'interface déjà chargée reste utilisable ;
+* les mises à jour sont **automatiques** (aucune réinstallation).
+
+Bon à savoir :
+
+* l'installation nécessite **HTTPS** (ou `localhost`) ;
+* le choix des thèmes, le profil actif et la session sont conservés sur l'appareil ;
+* désinstaller = supprimer l'icône (les données du serveur ne sont pas affectées).
 
 ---
 

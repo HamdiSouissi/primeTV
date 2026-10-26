@@ -102,26 +102,6 @@ services:
     networks: [primetv_net]
     logging: *logging
 
-  # ---------------------------------------------------------------- Application Flutter (web)
-  mobile-web:
-    build:
-      context: ./mobile
-      dockerfile: Dockerfile
-      args:
-        API_BASE_URL: ${VITE_API_BASE_URL:-/api/v1}
-    <<: *restart
-    expose: ["80"]
-    depends_on:
-      backend:
-        condition: service_healthy
-    healthcheck:
-      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
-      interval: 20s
-      timeout: 5s
-      retries: 5
-    networks: [primetv_net]
-    logging: *logging
-
   # ---------------------------------------------------------------- Reverse proxy Nginx
   nginx:
     image: nginx:1.27-alpine

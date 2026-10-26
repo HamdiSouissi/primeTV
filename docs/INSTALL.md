@@ -1,7 +1,7 @@
 # Installation
 
 Trois méthodes : **Docker Compose** (recommandé), **manuel** (Python + Node) ou **développement local**.
-L'application Android/Flutter est détaillée en fin de document.
+PrimeTV est une **application web unique** (installable en PWA) : aucun SDK mobile n'est requis.
 
 ---
 
@@ -11,11 +11,10 @@ L'application Android/Flutter est détaillée en fin de document.
 |---|---|---|
 | Docker Engine | 24.x | + plugin `docker compose` v2 |
 | Docker Compose | 2.20 | Fourni avec Docker Desktop |
-| RAM | 2 Go | 4 Go confortable (build Flutter Web) |
+| RAM | 2 Go | 4 Go confortable (build du front-end) |
 | Disque | 5 Go | Images + volumes |
 | Python | 3.11 | Méthode manuelle / développement |
-| Node.js | 20 (22 conseillé) | Build frontend |
-| Flutter | 3.22 | Application Android / Web |
+| Node.js | 20 (22 conseillé) | Build du front-end React |
 | OpenSSL | 1.1 | Certificat TLS local |
 
 Ports par défaut : **8080** (HTTP), **8443** (HTTPS), **80/443** si profil Traefik.
@@ -88,7 +87,7 @@ docker compose ps
 curl -s localhost:8080/healthz | jq
 ```
 
-Attendu : conteneurs `postgres`, `redis`, `backend`, `web`, `mobile-web`, `nginx` en `healthy`.
+Attendu : conteneurs `postgres`, `redis`, `backend`, `web`, `nginx` en `healthy`.
 
 ---
 
@@ -182,43 +181,39 @@ vers le serveur.
 
 ---
 
-## 5. Application Android
+## 5. Application web installable (PWA)
 
-### 5.1 Depuis les sources
+L'interface est servie en même origine que l'API : aucune configuration supplémentaire.
 
-```bash
-cd mobile
-flutter pub get
-# Émulateur Android (10.0.2.2 = hôte)
-flutter run --dart-define=API_BASE_URL=http://10.0.2.2:8000/api/v1
-# Appareil physique (remplacez par l'IP LAN du serveur)
-flutter run --dart-define=API_BASE_URL=http://192.168.1.20:8080/api/v1
-```
+| Usage | URL |
+|---|---|
+| Interface | `http://localhost:8080` (production) ou `http://localhost:5173` (développement) |
+| Installation | bouton **Installer** dans la barre supérieure, ou menu du navigateur |
+| Mode hors ligne | page dédiée `offline.html` servie par le service worker |
 
-### 5.2 APK de production
+### 5.1 Installation sur les appareils
 
-```bash
-flutter build apk --release \
-  --dart-define=API_BASE_URL=https://tv.example.com/api/v1
-# ou App Bundle pour le Play Store
-flutter build appbundle --release --dart-define=API_BASE_URL=https://tv.example.com/api/v1
-```
+* **Android** (Chrome/Edge/Samsung Internet) : ouvrir l'URL → **Installer l'application**.
+* **iOS/iPadOS** (Safari) : Partager → **Sur l'écran d'accueil**.
+* **Windows/macOS/Linux** (Chrome/Edge) : icône d'installation de la barre d'adresse.
 
-Le fichier est généré dans `mobile/build/app/outputs/flutter-apk/app-release.apk`.
-Pour signer avec votre keystore, voir [DEPLOYMENT.md](DEPLOYMENT.md#4-signature-android).
+L'installation exige **HTTPS** (ou `localhost`). Détails, stratégies de cache et limites :
+[PWA.md](PWA.md).
 
-> Si le dossier `android/` est incomplet après un clone (wrapper Gradle absent), exécutez une fois :
-> `cd mobile && flutter create --platforms=android .` puis `flutter pub get`.
-
-### 5.3 Version Web
+### 5.2 Vérifier le service worker et le manifeste
 
 ```bash
-cd mobile
-flutter build web --release --base-href /mobile/ \
-  --dart-define=API_BASE_URL=/api/v1
+curl -s http://localhost:8080/manifest.webmanifest | jq '{name, display, icons: (.icons|length)}'
+curl -sI http://localhost:8080/sw.js | grep -i 'cache-control'
 ```
 
-Ou via Docker : `docker compose build mobile-web` (page servie sur `/mobile/`).
+Dans Chrome : **DevTools → Application → Manifest / Service Workers**.
+
+### 5.3 Régénérer les icônes
+
+```bash
+cd web && python3 scripts/generate-icons.py
+```
 
 ---
 

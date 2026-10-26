@@ -21,6 +21,16 @@ echo "== Frontend : tests =="
 echo "== Frontend : build =="
 (cd web && npm run build)
 
+echo "== PWA : artefacts installables =="
+for artefact in manifest.webmanifest sw.js offline.html icons/icon-192.png icons/icon-512.png; do
+  if [[ -f "web/dist/$artefact" ]]; then
+    echo "  ✓ $artefact"
+  else
+    echo "  ✘ $artefact manquant (build incomplet)" >&2
+    exit 1
+  fi
+done
+
 echo "== API : smoke test (si l'API est démarrée) =="
 if curl -fsS "${BASE_URL:-http://localhost:8000}/healthz" >/dev/null 2>&1; then
   ./tests/api/smoke.sh

@@ -113,8 +113,8 @@ L'URL demandée n'appartient pas au domaine du flux (protection anti-relais).
 Les CDN utilisant un domaine radicalement différent ne sont pas relayés : utilisez `direct_url`.
 
 ### Pas de son / pas d'image
-Vérifiez le volume du lecteur et le codec (certains flux AAC/HEVC ne sont pas décodés par tous
-les navigateurs). Sur Android, ExoPlayer gère davantage de codecs.
+Vérifiez le volume du lecteur et le codec : certains flux HEVC/AC-3 ne sont pas décodés par tous
+les navigateurs. L'application est une web app unique — testez un autre navigateur si besoin.
 
 ### DRM affiché, lecture impossible
 Comportement attendu : PrimeTV ne contourne pas Widevine/PlayReady/FairPlay.
@@ -181,22 +181,35 @@ Nginx sert bien le nouveau `dist`.
 
 ---
 
-## Android / Flutter
+## Application web / PWA
 
-### `Cleartext HTTP traffic not permitted`
-Le manifeste autorise déjà `usesCleartextTraffic="true"`. En production, utilisez HTTPS.
+### Le bouton « Installer » n'apparaît pas
+* l'installation exige **HTTPS** (ou `localhost`) et un navigateur compatible
+  (Chrome, Edge, Samsung Internet) ;
+* le service worker doit être actif : DevTools → Application → Service Workers ;
+* sur **iOS**, l'invite n'existe pas : Partager → « Sur l'écran d'accueil ».
 
-### Écran blanc au lancement
-Vérifiez `API_BASE_URL` (`--dart-define`) et la connectivité ; l'app affiche l'URL appelée
-sur l'écran de connexion.
+### Manifeste introuvable / `404` sur `/sw.js`
+Le build n'a pas été refait après l'ajout des fichiers PWA :
+`cd web && npm run build`, puis vérifiez que `dist/manifest.webmanifest` et `dist/sw.js` existent.
+Avec Nginx, contrôlez le `root` et le `try_files`.
 
-### Impossible de se connecter depuis un appareil physique
-Utilisez l'IP LAN de la machine (`http://192.168.1.20:8080/api/v1`), pas `localhost`.
-Ouvrez le port 8080 dans le pare-feu.
+### L'interface reste sur une ancienne version
+Le service worker sert l'app shell depuis le cache : `sw.js` est pourtant revalidé à chaque
+chargement. Forcez la mise à jour (DevTools → Application → Service Workers → *Update*),
+ou fermez tous les onglets PrimeTV puis rouvrez l'application.
 
-### `flutter pub get` échoue
-Vérifiez la version de Flutter (≥ 3.22) et votre accès à pub.dev ; en entreprise, configurez un proxy
-`PUB_HOSTED_URL`.
+### Page blanche après déploiement
+Le serveur doit renvoyer `index.html` pour toutes les routes (`try_files $uri $uri/ /index.html;`)
+et servir les assets sous `/assets/`. Vérifiez aussi `base` dans `vite.config.ts` (laisser `/`).
+
+### Mode hors ligne sans intérêt / API figée
+Comportement normal : `/api/**` n'est jamais mis en cache. Si vous voulez un catalogue
+consultable hors connexion, c'est un chantier produit (cache IndexedDB), non activé par défaut.
+
+### Picthre-in-Picture inactif
+Disponible si le navigateur le permet, en HTTPS, et si la vidéo est lancée par un geste
+utilisateur. Firefox/Safari peuvent le désactiver.
 
 ---
 

@@ -1,7 +1,7 @@
 # =============================================================================
 # PrimeTV — intégration continue
 # -----------------------------------------------------------------------------
-# Trois chaînes indépendantes (backend, frontend, mobile) + un job d'intégration
+# Trois chaînes indépendantes (backend, frontend, PWA) + un job d'intégration
 # qui démarre l'API sur SQLite en mémoire et exécute le smoke test HTTP.
 # Aucun secret n'est requis : la CI utilise une configuration de test.
 # =============================================================================
@@ -93,29 +93,55 @@ jobs:
           path: web/dist
           retention-days: 7
 
-  mobile:
-    name: Mobile · analyse + tests Flutter
+  pwa:
+    name: PWA · build installable
     runs-on: ubuntu-latest
-    timeout-minutes: 20
+    timeout-minutes: 15
+    needs: frontend
     steps:
       - uses: actions/checkout@v4
-      - uses: subosito/flutter-action@v2
+      - uses: actions/setup-node@v4
         with:
-          flutter-version: "3.24.5"
-          channel: stable
-          cache: true
-      - name: Dépendances
-        working-directory: mobile
-        run: flutter pub get
-      - name: Analyse statique
-        working-directory: mobile
-        run: flutter analyze
-      - name: Tests
-        working-directory: mobile
-        run: flutter test
-      - name: Build web (vérifie la compilation)
-        working-directory: mobile
-        run: flutter build web --release --base-href /mobile/
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: web/package-lock.json
+      - name: Installer les dépendances
+        working-directory: web
+        run: npm ci --no-audit --no-fund
+      - name: Construire le bundle de production
+        working-directory: web
+        run: npm run build
+      - name: Vérifier les artefacts PWA
+        working-directory: web
+        run: |
+          set -eu
+          test -f dist/manifest.webmanifest   || { echo "manifeste absent"; exit 1; }
+          test -f dist/sw.js                  || { echo "service worker absent"; exit 1; }
+          test -f dist/offline.html           || { echo "page hors ligne absente"; exit 1; }
+          for size in 192 512; do
+            test -f "dist/icons/icon-$size.png" || { echo "icône $size absente"; exit 1; }
+          done
+          grep -q '"display": "standalone"' dist/manifest.webmanifest
+          grep -q 'manifest.webmanifest' dist/index.html
+          node -e "JSON.parse(require('fs').readFileSync('dist/manifest.webmanifest','utf8')); console.log('manifeste JSON valide')"
+      - name: Servir le build et tester le service worker
+        working-directory: web
+        run: |
+          npx vite preview --host 127.0.0.1 --port 4173 > /tmp/preview.log 2>&1 &
+          for i in $(seq 1 30); do
+            curl -fsS http://127.0.0.1:4173/ >/dev/null 2>&1 && break
+            sleep 1
+          done
+          curl -fsS http://127.0.0.1:4173/manifest.webmanifest | head -c 120
+          curl -fsS http://127.0.0.1:4173/sw.js | head -n 3
+          curl -fsS http://127.0.0.1:4173/offline.html | grep -q 'hors connexion'
+          echo "PWA servie correctement"
+      - name: Publier le bundle PWA
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-dist-pwa
+          path: web/dist
+          retention-days: 7
 
   integration:
     name: API · smoke test de bout en bout

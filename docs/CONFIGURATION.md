@@ -103,7 +103,7 @@ pour faire remonter davantage les chaînes arabes.
 | `VITE_BACKEND_URL` | `http://127.0.0.1:8000` | Cible du proxy **Vite** en développement |
 
 Le proxy de lecture renvoie des URLs **relatives** (`/api/v1/streams/proxy?...`) : le web, Nginx et
-l'app Flutter fonctionnent donc en même origine. Pour Flutter, l'URL est préfixée par `API_BASE_URL`.
+l'application web fonctionne donc en même origine (aucune URL d'API à configurer côté client).
 
 ## Traefik
 

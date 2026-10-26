@@ -115,10 +115,12 @@ Ajoutez un `tags` dans `TAGS_METADATA` (main.py) et la route apparaît dans Swag
 2. Route dans `web/src/App.tsx` (sous `ProtectedLayout`).
 3. Entrée de navigation dans `web/src/components/Layout.tsx`.
 
-### 4.6 Mobile : nouvel écran
+### 4.6 PWA : faire évoluer l'application installable
 
-1. `mobile/lib/screens/mon_ecran.dart` (`StatefulWidget`, `context.watch<AppState>()`).
-2. Ajoutez un `NavigationDestination` dans `home_shell.dart` ou poussez la route via `Navigator`.
+1. Ajoutez les nouvelles ressources statiques à `SHELL_ASSETS` dans `web/public/sw.js`.
+2. Incrémentez la constante `VERSION` du service worker pour invalider les caches.
+3. Documentez tout nouveau raccourci dans `public/manifest.webmanifest` (`shortcuts`).
+4. Testez avec `npm run build && npm run preview`, puis Chrome → DevTools → Application.
 
 ## 5. Base de données
 
@@ -183,17 +185,17 @@ Frontend :
 cd web && npm run test -- --watch      # mode interactif
 ```
 
-Mobile :
+PWA (manifeste + service worker) :
 
 ```bash
-cd mobile && flutter test
+cd web && npm run build && npm run preview   # http://localhost:4173
+# DevTools → Application → Manifest / Service Workers
 ```
 
 ## 7. Conventions
 
 * Python : `ruff check app tests` (ligne 110), annotations, docstrings en français, pas de `print`.
 * TypeScript : `strict`, pas de `any` implicite, composants fonctionnels, hooks, TanStack Query.
-* Dart : `flutter analyze`, `flutter_lints`, widgets const quand possible.
 * Commits : `feat:`, `fix:`, `docs:`, `test:`, `refactor:`, `chore:` (Conventional Commits).
 * Une fonctionnalité = code + test + documentation.
 

@@ -21,6 +21,7 @@ import {
 } from 'lucide-react';
 import { Suspense, lazy, useEffect, useState } from 'react';
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { InstallButton } from '@/components/InstallButton';
 import { useProfiles } from '@/hooks/queries';
 import { APP_NAME } from '@/lib/constants';
 import { useAuthStore } from '@/store/auth';
@@ -103,7 +104,7 @@ export function Layout() {
         </nav>
         <div className="mt-4 rounded-xl border border-white/10 bg-gradient-to-br from-brand-600/20 to-accent-500/10 p-3 text-xs text-slate-600 dark:text-slate-300">
           <p className="font-semibold text-slate-800 dark:text-white">100 % open source</p>
-          <p className="mt-1 leading-relaxed">FastAPI · React · PostgreSQL · Redis · Docker · Flutter</p>
+          <p className="mt-1 leading-relaxed">FastAPI · React · PostgreSQL · Redis · Docker · PWA</p>
           <a
             href="/docs"
             target="_blank"
@@ -186,6 +187,7 @@ export function Layout() {
                   ))}
                 </select>
               </div>
+              <InstallButton />
               <button
                 type="button"
                 onClick={toggleTheme}

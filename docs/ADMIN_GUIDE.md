@@ -32,7 +32,7 @@ curl -X PATCH localhost:8080/api/v1/admin/users/<id> \
 
 ```bash
 docker compose ps                 # état + healthchecks
-./scripts/healthcheck.sh          # API, docs, web, Flutter, conteneurs
+./scripts/healthcheck.sh          # API, docs, web, manifeste PWA, conteneurs
 docker compose logs -f backend    # logs applicatifs (JSON en production)
 docker stats                      # CPU / mémoire
 ```

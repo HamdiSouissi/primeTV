@@ -89,7 +89,7 @@ cat <<MSG
 ${BOLD}PrimeTV est installé.${RESET}
 
   Interface web   : http://localhost:${HTTP_PORT:-8080}
-  Application Flutter (web) : http://localhost:${HTTP_PORT:-8080}/mobile/
+  Installation PWA          : bouton « Installer » dans l'interface
   Documentation API : http://localhost:${HTTP_PORT:-8080}/docs
   Traefik (si --tls) : https://${TRAEFIK_DOMAIN:-primetv.localhost}
 

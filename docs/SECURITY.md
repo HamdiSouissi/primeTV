@@ -20,8 +20,8 @@
 * Rôles : `user` et `admin`. Les routes `/admin/*` exigent `role=admin`.
 * Toutes les ressources (fournisseurs, playlists, EPG, favoris, historique) sont **scopées par utilisateur**
   ou par profil : un identifiant d'autrui renvoie 404, jamais 403 (pas d'énumération).
-* Le web stocke les jetons dans `localStorage` (persist zustand) ; l'app Flutter utilise
-  `flutter_secure_storage` (Keystore/Keychain).
+* Le front-end (unique application web) stocke les jetons dans `localStorage` via
+  `zustand/persist` ; le service worker **ne met jamais en cache** les réponses `/api/**`.
 
 ### Rotation de `SECRET_KEY`
 
