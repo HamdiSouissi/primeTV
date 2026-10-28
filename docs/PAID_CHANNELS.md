@@ -128,7 +128,80 @@ PrimeTV importe ces flux en un clic : [FREE_SOURCES.md](FREE_SOURCES.md).
 
 ---
 
-## 6. Résumé
+## 6. « Comment font Yacine TV, Alpha TV, Drama Live ? »
+
+Question légitime, et la réponse est instructive — mais elle décrit un modèle que
+PrimeTV ne peut pas et ne veut pas reproduire.
+
+### 6.1 Leur architecture réelle (ce qu'ils font)
+
+| Brique | Ce qu'ils font | Pourquoi c'est fragile |
+|---|---|---|
+| **Catalogue** | Une liste de chaînes **pré-remplie** par l'éditeur, jamais par l'utilisateur | Elle dépend entièrement de leurs propres serveurs : si le serveur tombe, l'app est vide |
+| **Flux** | Des **re-streams** de chaînes payantes capturés puis réencodés sur leurs propres origines (HTTP/HLS), souvent en clair (pas de DRM) | Illégal : c'est de la retransmission sans droits. Les origines sont saisies ou coupées régulièrement |
+| **Distribution du catalogue** | Une API maison (JSON/panel) avec **serveurs miroirs** et domaines qui tournent | Chaque changement de domaine = nouvelle version d'APK à installer |
+| **Client** | Un APK **hors Play Store** (sideloading), parfois couplé à un lecteur externe (« YTV Player ») | Aucun contrôle de sécurité : l'APK peut lire vos SMS, vos contacts, votre position |
+| **Monétisation** | **Publicité** et pop-ups très intrusifs, « premium » pour les retirer, parfois revente de données ou de « clés » d'activation | C'est la seule source de revenus, puisqu'aucun abonnement n'existe |
+| **Obfuscation** | Code obfusqué, un ou deux niveaux de redirection, hébergement dans des juridictions peu coopératives | Ce n'est pas un service technique : c'est une course-poursuite |
+
+Autrement dit : **Yacine TV n'a pas « trouvé les serveurs » de beIN Sports.** Il a
+mis en place une infrastructure de **redistribution illicite**, alimentée par des
+captures, et il la finance par la publicité. La « gratuité » est payée par votre
+bande passante, vos données et votre responsabilité juridique.
+
+### 6.2 Ce que ça coûte réellement aux utilisateurs
+
+- **Blocages** : en France, le tribunal judiciaire de Paris a ordonné (mars 2026)
+  le blocage de **35 domaines** de streaming sportif — dont `yacine-tv.com` et
+  `yacine-tv.watch` — en visant cette fois **les FAI, les résolveurs DNS
+  (Google, Cloudflare, Quad9) et 4 VPN** (ProtonVPN, CyberGhost, ExpressVPN),
+  décisions valables jusqu'en juin 2026 et **extensibles** sans nouveau procès.
+- **Sanctions** : des revendeurs d'abonnements IPTV illégaux ont été condamnés à
+  de la prison avec sursis ; des utilisateurs ont écopé d'amendes (jusqu'à 400 €
+  en France, et jusqu'à 5 000 € d'amende administrative en récidive).
+- **Sécurité** : APK modifiés, chevaux de Troie, ransomwares, phishing d'identifiants
+  d'opérateur. Aucune mise à jour de sécurité, aucun audit possible.
+- **Instabilité** : catalogue qui disparaît, qualité qui s'effondre, chaînes
+  remplacées sans préavis, aucune EPG fiable.
+
+### 6.3 Pourquoi PrimeTV ne copie pas ce modèle
+
+PrimeTV est un **lecteur et un agrégateur**, pas un **diffuseur** :
+
+| | Yacine TV / Alpha TV / Drama Live | PrimeTV |
+|---|---|---|
+| Qui fournit les flux ? | L'éditeur (redistribution non autorisée) | **Vous** (fichier, URL, Xtream autorisé) |
+| Sources légales (FAST, FTA) | Possible mais noyé dans le reste | **Cœur du produit** (panneau « Sources libres ») |
+| DRM Widevine | Contourné / capturé | **Refusé explicitement** |
+| Distribution | APK hors store, domaine tournant | **PWA installable** depuis votre propre instance |
+| Données personnelles | Revendues, permissions larges | Multi-profils locaux, identifiants chiffrés (Fernet) |
+| Code | Fermé, obfusqué | **MIT, auditable** (ce dépôt) |
+| Modèle économique | Pub + data | **Aucun** : auto-hébergé, pas de tracker |
+
+### 6.4 Ce que PrimeTV vous donne « comme eux », mais légalement
+
+- Une **belle interface** de type TV : grille chaînes, catégories, recherche, favoris,
+  historique avec reprise, multi-profils, EPG.
+- **Installation en un clic** sur Android/iOS/Windows/macOS via la PWA (pas d'APK,
+  pas de store, mises à jour automatiques).
+- Des **centaines de chaînes gratuites** prêtes à l'emploi (iptv-org : sport, news,
+  musique, arabe/français) via [FREE_SOURCES.md](FREE_SOURCES.md).
+- La possibilité d'ajouter **vos propres** sources autorisées (abonnement opérateur,
+  portail Xtream de votre fournisseur agréé).
+
+C'est la même ergonomie, sans les risques : la légalité ne vient pas du logiciel,
+elle vient de **qui fournit le flux**. Pour beIN Sports, ce fournisseur doit être
+beIN (via Orange/Ooredoo) ou un opérateur agréé.
+
+### 6.5 Sources
+
+- Presse Citron / 01net, avril 2026 — blocage de 35 sites sportifs, extension aux
+  VPN et DNS par le tribunal de Paris.
+- TorrentFreak — décisions du 18 mars 2026 (Liga / beIN Sports).
+- Daily Fit, juin 2025 — sanctions encourues, techniques d'évitement (domaines
+  tournants, hébergement à l'étranger, serveurs miroirs).
+
+## 7. Résumé
 
 1. Aucun serveur « beIN Sports déchiffré » ne sera fourni : c'est illégal et
    techniquement impossible sans casser le DRM.
@@ -137,6 +210,9 @@ PrimeTV importe ces flux en un clic : [FREE_SOURCES.md](FREE_SOURCES.md).
 3. PrimeTV accepte vos **propres** sources (M3U, Xtream autorisé, ClearKey légitime)
    et **refuse** de lire les flux DRM — c'est une garantie de conformité, pas un bug.
 4. Pour le sport gratuit, utilisez le panneau « Sources libres ».
+5. Les applis type **Yacine TV / Alpha TV / Drama Live** ne « trouvent » pas les
+   flux : elles **rediffusent** illégalement et se financent par la pub. Voir la
+   section 6 pour l'architecture, les risques et la comparaison avec PrimeTV.
 
 *Voir aussi : [SECURITY.md](SECURITY.md#drm-et-legalite) · [FREE_SOURCES.md](FREE_SOURCES.md) ·
 [USER_GUIDE.md](USER_GUIDE.md).*
