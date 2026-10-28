@@ -252,7 +252,8 @@ def play_channel(
         if channel.drm_systems:
             message = (
                 "Flux protégé par DRM (Widevine/PlayReady). Lecture non prise en charge : "
-                "utilisez une source libre ou votre propre lecteur agréé."
+                "utilisez l'application officielle du diffuseur (beIN CONNECT, Canal+…) "
+                "ou une source libre."
             )
         else:
             message = "Flux chiffré (AES-128/ClearKey). Ajoutez vos clés dans « Accès » si vous en disposez."

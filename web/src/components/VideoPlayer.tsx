@@ -324,7 +324,12 @@ export function VideoPlayer({ playback, channel, startPosition = 0, onProgress }
             'Ce flux est protégé par un système DRM (Widevine/PlayReady/FairPlay). PrimeTV ne contourne pas ces protections.'}
         </p>
         <p className="max-w-lg text-xs text-slate-400">
-          Ajoutez une source libre dans « Sources & playlists » ou utilisez votre propre lecteur agréé.
+          Chaîne payante ? Utilisez l’application officielle de votre diffuseur (beIN CONNECT, Canal+, OSN…).
+          Pour du contenu libre, importez une source dans « Sources & playlists ».
+        </p>
+        <p className="max-w-lg text-[11px] text-slate-500">
+          PrimeTV ne fournit ni ne recherche aucune clé : voir docs/PAID_CHANNELS.md (voies légales) et
+          docs/SECURITY.md (politique DRM).
         </p>
       </div>
     );

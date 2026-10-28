@@ -97,6 +97,10 @@ Le catalogue de démonstration ne contient que des flux publics de test.
 
 **En cas de doute : n'importez pas la source.**
 
+Cas concret des chaînes sportives payantes (beIN Sports, Canal+, OSN) : voir
+[PAID_CHANNELS.md](PAID_CHANNELS.md) — voies légales, tarifs opérateurs et
+comportement de PrimeTV face au DRM.
+
 ## 6. Données personnelles (RGPD)
 
 | Donnée | Finalité | Base légale | Conservation |

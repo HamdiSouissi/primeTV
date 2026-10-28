@@ -89,6 +89,14 @@ direct ») : c'est la source la plus fiable pour retrouver une URL quand elle ch
 
 ---
 
+## 2.4 Et les chaînes payantes (beIN Sports, Canal+…) ?
+Elles ne sont **pas** dans ces listes, et ne le seront jamais : ce sont des services
+cryptés (Widevine/PlayReady). Les voies légales (beIN CONNECT via Orange/Ooredoo en
+Tunisie, abonnement direct) et l'intégration d'un abonnement autorisé sont décrites
+dans **[PAID_CHANNELS.md](PAID_CHANNELS.md)**.
+
+---
+
 ## 3. Importer dans PrimeTV (3 méthodes)
 
 ### a. Panneau intégré (le plus simple)

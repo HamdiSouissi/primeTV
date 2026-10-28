@@ -169,7 +169,18 @@ Guide complet, listes par pays, EPG et cadre légal : **[FREE_SOURCES.md](FREE_S
 
 ---
 
-## 12. Questions fréquentes
+## 12. Chaînes payantes (beIN Sports, Canal+…)
+
+PrimeTV **ne fournit pas** de flux cryptés et ne contourne aucun DRM : un flux
+Widevine/PlayReady est détecté puis bloqué (message explicite dans le lecteur).
+Pour regarder ces chaînes, passez par l'offre officielle (beIN CONNECT via Orange
+Tunisie ou Ooredoo, abonnement direct, opérateur agréé). Si votre fournisseur
+**autorisé** vous fournit une URL M3U ou des identifiants Xtream, vous pouvez
+l'importer normalement. Détails : **[PAID_CHANNELS.md](PAID_CHANNELS.md)**.
+
+---
+
+## 13. Questions fréquentes
 
 **Les images des logos ne s'affichent pas ?**
 Certains serveurs bloquent le hotlinking. Le lecteur affiche alors les initiales de la chaîne.

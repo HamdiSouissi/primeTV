@@ -351,6 +351,7 @@ cd web && npm run test                               # 12 tests
 | [Déploiement & production](docs/DEPLOYMENT.md) | DevOps |
 | [Application web & PWA](docs/PWA.md) | Tous |
 | [Sources gratuites & légales](docs/FREE_SOURCES.md) | Tous |
+| [Chaînes payantes & cryptées (beIN, Canal+…)](docs/PAID_CHANNELS.md) | Tous |
 | [Sécurité & légalité](docs/SECURITY.md) | Tous |
 | [Architecture & schéma BDD](docs/ARCHITECTURE.md) | Dev |
 | [Dépannage](docs/TROUBLESHOOTING.md) | Tous |
