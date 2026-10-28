@@ -119,3 +119,20 @@ def test_parse_xmltv_datetime_variants():
     assert parse_xmltv_datetime("20260101120000") == datetime(2026, 1, 1, 12, 0, tzinfo=UTC)
     assert parse_xmltv_datetime("20260101120000 -0500") == datetime(2026, 1, 1, 17, 0, tzinfo=UTC)
     assert parse_xmltv_datetime("bad") is None
+
+
+def test_classifier_handles_plurals_and_radio_fallback():
+    """Les groupes au pluriel sont reconnus et une radio générique reste musicale."""
+    # « Documentaires » (pluriel) doit être classé documentaire, pas divertissement.
+    assert detect_category("NASA TV", "Documentaires") == "documentary"
+    assert detect_category("Eurosport", "Sports") == "sport"
+    # « radio » n'est plus un mot-clé musical : le groupe décide.
+    assert detect_category("franceinfo", "Radio — Actualités") == "news"
+    assert detect_category("France Culture", "Radio — Culture") == "culture"
+    from app.services.classifier import classify
+
+    assert classify("France Musique", group="Radio — Musique", is_radio_hint=True).category_slug == "music"
+    # Repli : radio sans mot-clé identifiable → music (et non entertainment).
+    assert classify("France Inter", group="Radio", is_radio_hint=True).category_slug == "music"
+    # Une chaîne TV sans indice reste dans « entertainment ».
+    assert classify("Ma Chaîne", is_radio_hint=False).category_slug == "entertainment"

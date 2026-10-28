@@ -159,7 +159,17 @@ Bon à savoir :
 
 ---
 
-## 11. Questions fréquentes
+## 11. Trouver des chaînes gratuites (sans abonnement)
+
+PrimeTV intègre un catalogue de sources **gratuites et légales** : *Sources & playlists →
+Playlists → « Sources libres prêtes à l'emploi »*. Un clic importe la sélection
+(actualités, sport, chaînes arabes, jeunesse, cinéma…), puis un scan vérifie les flux.
+
+Guide complet, listes par pays, EPG et cadre légal : **[FREE_SOURCES.md](FREE_SOURCES.md)**.
+
+---
+
+## 12. Questions fréquentes
 
 **Les images des logos ne s'affichent pas ?**
 Certains serveurs bloquent le hotlinking. Le lecteur affiche alors les initiales de la chaîne.

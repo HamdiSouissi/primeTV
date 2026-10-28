@@ -1,5 +1,12 @@
 # Guide administrateur
 
+## Sources autorisées
+
+Rappelez aux utilisateurs que seules les sources **free-to-air** ou fournies par un
+abonnement personnel sont autorisées. Le panneau « Sources libres » de l'interface
+propose une sélection déjà conforme (iptv-org, Free-TV, diffuseurs publics) :
+[FREE_SOURCES.md](FREE_SOURCES.md).
+
 ## 1. Rôles et comptes
 
 * **admin** : accès total (gestion des utilisateurs via `/api/v1/admin/*`).

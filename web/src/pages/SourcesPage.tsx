@@ -21,6 +21,8 @@ import { useEpgSources, usePlaylists, useProviders } from '@/hooks/queries';
 import { formatDateTime, relativeTime, STATUS_LABELS } from '@/lib/format';
 import { toast } from '@/store/toast';
 import { Badge, EmptyState, LoadingBlock, Modal, SectionHeading } from '@/components/ui';
+import { FreeSourcesPanel } from '@/components/FreeSourcesPanel';
+import { FREE_EPG_SOURCES } from '@/lib/freeSources';
 
 type Tab = 'playlists' | 'providers' | 'epg';
 type ImportMode = 'url' | 'file' | 'xtream' | 'text';
@@ -168,6 +170,15 @@ export function SourcesPage() {
     onError: (error) => toast.error(apiErrorMessage(error, 'Ajout impossible')),
   });
 
+  const addFreeEpg = useMutation({
+    mutationFn: (source: { name: string; url: string }) => epgApi.create({ name: source.name, url: source.url }),
+    onSuccess: () => {
+      toast.success('Source EPG libre ajoutée — lancez la synchronisation');
+      invalidateAll();
+    },
+    onError: (error) => toast.error(apiErrorMessage(error, 'Ajout impossible')),
+  });
+
   const syncEpg = useMutation({
     mutationFn: (id: string) => epgApi.sync(id),
     onSuccess: (result) => {
@@ -285,6 +296,8 @@ export function SourcesPage() {
         </div>
       )}
 
+      {tab === 'playlists' && <FreeSourcesPanel onImported={onImported} />}
+
       {tab === 'providers' && (
         <div className="surface overflow-hidden">
           <div className="flex items-center justify-between border-b border-white/10 px-4 py-3">
@@ -352,6 +365,35 @@ export function SourcesPage() {
                 }}
               />
             </label>
+          </div>
+
+          <div className="surface overflow-hidden">
+            <div className="border-b border-white/10 px-4 py-3">
+              <h2 className="font-display text-sm font-semibold">Guides libres recommandés</h2>
+              <p className="text-xs text-slate-500 dark:text-slate-400">
+                Association automatique si les <code>tvg-id</code> de vos chaînes correspondent au guide.
+              </p>
+            </div>
+            <ul>
+              {FREE_EPG_SOURCES.map((source) => (
+                <li key={source.id} className="table-row">
+                  <div className="min-w-0 flex-1">
+                    <p className="truncate font-semibold text-slate-800 dark:text-slate-100">{source.name}</p>
+                    <p className="truncate text-xs text-slate-500 dark:text-slate-400">
+                      {source.coverage} · {source.description}
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    className="btn-soft !px-2.5 !py-1.5 !text-xs"
+                    onClick={() => addFreeEpg.mutate({ name: source.name, url: source.url })}
+                    disabled={addFreeEpg.isPending}
+                  >
+                    <Plus className="h-3.5 w-3.5" /> Ajouter
+                  </button>
+                </li>
+              ))}
+            </ul>
           </div>
 
           <div className="surface overflow-hidden">

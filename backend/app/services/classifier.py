@@ -69,7 +69,7 @@ CATEGORY_RULES: dict[str, dict] = {
         "icon": "music",
         "color": "#ec4899",
         "keywords": [
-            "music", "musique", "mtv", "vh1", "trace", "mcm", "nrj", "virgin", "radio", "hits", "clips",
+            "music", "musique", "mtv", "vh1", "trace", "mcm", "nrj", "virgin", "hits", "clips",
             "dance", "rock", "jazz", "classic", "classique", "opera", "mezzo", "stingray", "kerrang",
             "موسيقى", "موسيقي", "أغاني", "اغاني", "طرب", "نجوم",
         ],
@@ -218,7 +218,8 @@ def detect_category(*sources: str | None) -> str:
             normalized_keyword = normalize_text(keyword)
             if not normalized_keyword:
                 continue
-            if re.search(rf"(?<!\w){re.escape(normalized_keyword)}(?!\w)", haystack):
+            # Un « s » final est toléré : « Documentaires », « Sports », « Films »…
+            if re.search(rf"(?<!\w){re.escape(normalized_keyword)}s?(?!\w)", haystack):
                 score += 3 if len(normalized_keyword) > 4 else 2
         if score:
             scores[slug] = score
@@ -249,7 +250,8 @@ def detect_language(*sources: str | None, country: str | None = None) -> str:
             continue
         for keyword in rule["keywords"]:
             normalized_keyword = normalize_text(keyword)
-            if re.search(rf"(?<!\w){re.escape(normalized_keyword)}(?!\w)", haystack):
+            # Un « s » final est toléré : « Documentaires », « Sports », « Films »…
+            if re.search(rf"(?<!\w){re.escape(normalized_keyword)}s?(?!\w)", haystack):
                 return code
 
     if _ARABIC_RE.search(joined_raw):
@@ -301,6 +303,10 @@ def classify(
 ) -> Classification:
     """Classe une chaîne de bout en bout."""
     category_slug = detect_category(name, group)
+    if category_slug == "entertainment" and is_radio_hint:
+        # Une radio sans mot-clé identifiable (ex. « France Inter ») reste une
+        # chaîne musicale plutôt que d'être rangée dans « Divertissement ».
+        category_slug = "music"
     language_code = detect_language(
         tvg_language or "", name, group, country=country
     )

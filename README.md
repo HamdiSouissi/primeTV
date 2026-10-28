@@ -39,6 +39,7 @@ Playlists M3U/M3U8 · Xtream Codes · HLS/DASH · EPG XMLTV · 8 catégories · 
 | Domaine | Détail |
 |---|---|
 | **Imports** | URL M3U / M3U8 / HLS, fichier `.m3u`, contenu collé, manifeste DASH `.mpd`, portail **Xtream Codes** (player_api.php) |
+| **Sources libres** | Catalogue intégré de playlists **gratuites et légales** (iptv-org, Free-TV) importables en un clic + guides EPG libres — voir [docs/FREE_SOURCES.md](docs/FREE_SOURCES.md) |
 | **EPG** | Import **XMLTV** par URL ou fichier, association automatique (`tvg-id` → `epg_channel_id` → nom normalisé), guide TV + « en cours / à suivre » |
 | **Lecture** | **HLS** (hls.js), **DASH** (dash.js), **MP4**, **MPEG-TS**, radios ; qualité auto ou manuelle, sous-titres, **Picture in Picture**, plein écran, proxy CORS |
 | **Catalogue** | Classification automatique : **Sport, News, Movies, Kids, Music, Religion, Documentary, Entertainment, Culture, Local, Adult** ; langues **AR, FR, EN, TR, ES**, + DE, IT, PT, NL, RU, HI, UR, FA, KU, ZH |
@@ -186,7 +187,7 @@ primeTV/
 ├── scripts/                      # install, update, backup, restore, dev, healthcheck, tests, certificat
 ├── tests/api/smoke.sh            # tests API bout-en-bout (curl)
 ├── docs/                         # 11 guides (installation, API, admin, sécurité…)
-├── examples/                     # playlist M3U + EPG XMLTV de démonstration
+├── examples/                     # playlists de démonstration + chaînes publiques légales + EPG XMLTV
 ├── .github/workflows/ci.yml      # CI (lint, tests, build, docker)
 ├── docker-compose.yml
 ├── .env.example
@@ -348,6 +349,7 @@ cd web && npm run test                               # 12 tests
 | [Guide développeur](docs/DEVELOPER_GUIDE.md) | Contributeurs |
 | [Déploiement & production](docs/DEPLOYMENT.md) | DevOps |
 | [Application web & PWA](docs/PWA.md) | Tous |
+| [Sources gratuites & légales](docs/FREE_SOURCES.md) | Tous |
 | [Sécurité & légalité](docs/SECURITY.md) | Tous |
 | [Architecture & schéma BDD](docs/ARCHITECTURE.md) | Dev |
 | [Dépannage](docs/TROUBLESHOOTING.md) | Tous |
