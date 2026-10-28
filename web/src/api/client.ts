@@ -5,6 +5,7 @@
  * - normalise les erreurs de l'API ({error: {code, message}}).
  */
 import axios, { AxiosError, type AxiosInstance, type InternalAxiosRequestConfig } from 'axios';
+import { reportApiStatus } from '@/store/apiStatus';
 
 export const TOKEN_KEY = 'primetv.session';
 const API_BASE = import.meta.env.VITE_API_BASE_URL ?? '/api/v1';
@@ -71,9 +72,22 @@ async function refreshAccessToken(): Promise<string | null> {
 }
 
 api.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    // Une réponse (même 4xx) prouve que l'API est joignable.
+    reportApiStatus('ok');
+    return response;
+  },
   async (error: AxiosError) => {
     const original = error.config as (InternalAxiosRequestConfig & { _retried?: boolean }) | undefined;
+    const status = error.response?.status;
+
+    // --- Diagnostic de connectivité (502/503/504 = proxy sans backend) --------
+    if (status === 502 || status === 503 || status === 504) {
+      reportApiStatus('unreachable', `HTTP ${status} sur ${error.config?.url ?? API_BASE}`);
+    } else if (!error.response && error.code !== 'ERR_CANCELED' && !original?._retried) {
+      reportApiStatus('offline', error.message);
+    }
+
     if (error.response?.status === 401 && original && !original._retried) {
       original._retried = true;
       refreshing = refreshing ?? refreshAccessToken();

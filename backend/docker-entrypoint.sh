@@ -4,6 +4,10 @@
 #   WEB_CONCURRENCY  : nombre de workers gunicorn (défaut : 4)
 #   PORT             : port d'écoute (défaut : 8000)
 #   RUN_MODE         : "web" (API) | "worker" (tâches) | "shell"
+#
+# Note : `--keep-alive 75` doit rester SUPÉRIEUR au délai d'inactivité de Nginx,
+# sinon Nginx peut réutiliser une connexion que Gunicorn vient de fermer, ce qui
+# provoque des « 502 Bad Gateway » intermittents.
 # =============================================================================
 set -eu
 
@@ -64,7 +68,7 @@ case "${1:-web}" in
       --bind "0.0.0.0:${PORT}" \
       --timeout 120 \
       --graceful-timeout 30 \
-      --keep-alive 5 \
+      --keep-alive 75 \
       --access-logfile - \
       --error-logfile -
     ;;

@@ -81,6 +81,47 @@ docker compose build --no-cache nginx
 docker compose up -d
 ```
 
+### `502 Bad Gateway` sur `/api/v1/config` (l'interface ne peut pas se connecter)
+
+Symptôme typique dans la console du navigateur :
+
+```
+GET http://localhost:8080/api/v1/config 502 (Bad Gateway)
+```
+
+Le proxy Nginx fonctionne (la page s'affiche) mais il ne joint pas le conteneur
+`backend`. PrimeTV 1.0.2 affiche désormais une **bannière rouge explicite** avec
+la commande à lancer ; voici la marche à suivre complète.
+
+```bash
+./scripts/diagnose.sh          # enchaîne les 6 vérifications et pointe la cause
+```
+
+Causes, par ordre de fréquence :
+
+| # | Cause | Vérification | Correctif |
+|---|---|---|---|
+| 1 | Backend arrêté / en boucle de redémarrage (erreur de base, import) | `docker compose ps` (`Restarting`, `unhealthy`) et `docker compose logs --tail=80 backend` | corriger l'erreur affichée, puis `docker compose up -d --force-recreate backend` |
+| 2 | **Backend recréé → nouvelle IP**, Nginx gardait l'ancienne | `docker compose exec nginx getent hosts backend` | `docker compose restart nginx` — **corrigé en 1.0.2** (résolution DNS dynamique via `resolver 127.0.0.11 valid=10s`) |
+| 3 | Mot de passe PostgreSQL incohérent entre `POSTGRES_PASSWORD` et `DATABASE_URL` | `docker compose logs backend` → `password authentication failed` | aligner les deux valeurs dans `.env`, `docker compose up -d --force-recreate backend` |
+| 4 | Base pas encore initialisée (premier démarrage) | `docker compose ps` → `postgres starting` | attendre ~30 s ; le point d'entrée attend la base (`DB_WAIT_SECONDS=60`) |
+| 5 | Variable `PORT` définie dans `.env` → gunicorn n'écoute pas sur 8000 | `grep '^PORT=' .env` | supprimer la ligne, `docker compose up -d --force-recreate backend` |
+| 6 | Conteneurs sur des réseaux différents | `docker compose exec nginx getent hosts backend` vide | `docker compose down && docker compose up -d` |
+
+Commandes de contrôle, dans l'ordre :
+
+```bash
+curl -i http://localhost:8080/nginx-health        # 200 → le proxy tourne
+curl -i http://localhost:8080/healthz             # 200 → API + base OK
+curl -i http://localhost:8080/api/v1/config       # 200 → route publique
+docker compose exec nginx curl -i http://backend:8000/healthz   # 200 → réseau Docker OK
+docker compose logs --tail=80 backend             # erreur applicative éventuelle
+```
+
+Tant que l'API est injoignable, l'interface affiche la bannière « L'API PrimeTV ne
+répond pas (502) » avec un bouton **Réessayer** (elle teste `/healthz` puis recharge
+si le backend est revenu) : inutile de vider le cache.
+
 ### Erreur 502 juste après un `docker compose up -d backend`
 Nginx résout le nom `backend` **au démarrage** et conserve l'adresse IP obtenue.
 Si le conteneur backend est **recréé** (nouvelle IP), rechargez le proxy :

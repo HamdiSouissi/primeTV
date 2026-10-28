@@ -36,26 +36,21 @@ RUN sed -i 's/\r$//' /etc/nginx/nginx.conf /etc/nginx/primetv_proxy_params.conf 
 # -----------------------------------------------------------------------------
 # Validation de la configuration AU BUILD
 # -----------------------------------------------------------------------------
-# Deux obstacles à `nginx -t` pendant la construction de l'image :
-#   1. les certificats TLS n'existent pas encore  → on en génère un jeu jetable ;
-#   2. les `upstream` (backend:8000, web:80) ne sont pas résolubles pendant le
-#      build (les conteneurs n'existent pas) → nginx répond
-#      « host not found in upstream "backend:8000" » et échoue.
+# `nginx -t` exige que les certificats TLS existent : on en génère un jeu
+# jetable, on valide, puis on le supprime (le volume monté au démarrage
+# fournira les vrais).
 #
-# On valide donc une COPIE temporaire de la configuration où les amonts Docker
-# sont remplacés par des adresses locales : la syntaxe, les `location`, les
-# modules, les `limit_req_zone` et les chemins de certificats sont vérifiés
-# exactement comme en production, sans dépendre du DNS de Docker Compose.
+# Les amonts (`backend:8000`, `web:80`) sont utilisés via variables dans
+# nginx.conf : leur résolution est différée à l'exécution (résolveur DNS de
+# Docker), donc `nginx -t` ne dépend plus du DNS de Compose — c'était la cause
+# de l'échec « host not found in upstream "backend:8000" » au build.
 RUN mkdir -p /etc/nginx/certs \
     && openssl req -x509 -nodes -days 1 -newkey rsa:2048 \
         -keyout /etc/nginx/certs/primetv.key -out /etc/nginx/certs/primetv.crt \
         -subj "/CN=localhost" >/dev/null 2>&1 \
-    && sed -e 's/server backend:8000;/server 127.0.0.1:8000;/' \
-           -e 's/server web:80;/server 127.0.0.1:8080;/' \
-           /etc/nginx/nginx.conf > /tmp/nginx-build-check.conf \
-    && nginx -t -c /tmp/nginx-build-check.conf \
-    && rm -f /tmp/nginx-build-check.conf /etc/nginx/certs/primetv.key /etc/nginx/certs/primetv.crt \
-    && echo "Configuration Nginx validée (amonts Docker neutralisés pour le test)"
+    && nginx -t \
+    && rm -f /etc/nginx/certs/primetv.key /etc/nginx/certs/primetv.crt \
+    && echo "Configuration Nginx validée"
 
 EXPOSE 80 443
 

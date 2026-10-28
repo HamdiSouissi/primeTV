@@ -1,0 +1,14 @@
+# Contexte de build backend : n'envoyer que le nécessaire
+.venv/
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+*.db
+*.db-shm
+*.db-wal
+tests/
+Dockerfile
+.dockerignore

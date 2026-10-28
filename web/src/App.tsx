@@ -14,6 +14,7 @@ import { ScanPage } from '@/pages/ScanPage';
 import { SettingsPage } from '@/pages/SettingsPage';
 import { SourcesPage } from '@/pages/SourcesPage';
 import { Toaster } from '@/components/ui';
+import { ApiStatusBanner } from '@/components/ApiStatusBanner';
 
 function ProtectedLayout() {
   const isAuthenticated = useAuthStore((state) => Boolean(state.accessToken));
@@ -41,6 +42,7 @@ function GuestOnly({ children }: { children: React.ReactNode }) {
 export function App() {
   return (
     <>
+      <ApiStatusBanner />
       <Routes>
         <Route
           path="/login"

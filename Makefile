@@ -16,7 +16,7 @@ PIP := backend/.venv/bin/pip
 
 .PHONY: help install up down restart logs ps build pull status \
         dev api web test test-backend test-web test-api lint fix-eol \
-        backup restore health clean shell-db shell-api
+        backup restore health diagnose clean shell-db shell-api
 
 help: ## Affiche cette aide
 	@echo "PrimeTV — commandes disponibles :"
@@ -92,6 +92,9 @@ fix-eol: ## Convertit les CRLF en LF (Windows) et vérifie les scripts
 # ------------------------------------------------------------------ exploitation
 health: ## Vérifie l'état de la pile
 	./scripts/healthcheck.sh
+
+diagnose: ## Diagnostique un 502 / « API injoignable »
+	./scripts/diagnose.sh
 
 backup: ## Sauvegarde PostgreSQL
 	./scripts/backup.sh

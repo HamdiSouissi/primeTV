@@ -330,6 +330,7 @@ cd web && npm run test                               # 12 tests
 | `scripts/restore.sh` | Restauration (`--latest` ou fichier) avec confirmation |
 | `scripts/dev.sh` | API + Vite en local |
 | `scripts/healthcheck.sh` | Vérifie API, docs, web, manifeste PWA, conteneurs |
+| `scripts/diagnose.sh` | Diagnostic guidé d'un 502 / « API injoignable » (6 contrôles) |
 | `scripts/fix-line-endings.sh` | Convertit les CRLF en LF (checkout Windows) et valide les scripts |
 | `scripts/test-all.sh` | Toute la suite de tests |
 | `scripts/gen-self-signed-cert.sh` | Certificat TLS local |

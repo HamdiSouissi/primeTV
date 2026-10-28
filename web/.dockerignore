@@ -1,0 +1,13 @@
+# Contexte de build front-end.
+# IMPORTANT : sans ce fichier, `COPY . .` écrase le node_modules installé dans
+# l'image par celui de l'hôte (binaire esbuild d'une autre plateforme) et le
+# build peut échouer ou produire un bundle cassé.
+node_modules/
+dist/
+coverage/
+.vite/
+*.tsbuildinfo
+.env
+.env.local
+Dockerfile
+.dockerignore
