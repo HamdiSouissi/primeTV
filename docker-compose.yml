@@ -1,0 +1,182 @@
+# =============================================================================
+# PrimeTV — orchestration Docker Compose
+#
+#   Démarrage standard :   docker compose up -d --build
+#   Démarrage avec TLS :   docker compose --profile tls up -d --build
+#   Journaux :             docker compose logs -f backend
+#   Arrêt :                docker compose down
+# =============================================================================
+name: primetv
+
+x-logging: &logging
+  driver: json-file
+  options:
+    max-size: "10m"
+    max-file: "5"
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  # ---------------------------------------------------------------- PostgreSQL
+  postgres:
+    image: postgres:16-alpine
+    <<: *restart
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-primetv}
+      POSTGRES_USER: ${POSTGRES_USER:-primetv}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD est requis}
+      PGDATA: /var/lib/postgresql/data/pgdata
+      TZ: UTC
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/10-primetv.sql:ro
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-primetv} -d ${POSTGRES_DB:-primetv}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 20s
+    networks: [primetv_net]
+    logging: *logging
+
+  # ---------------------------------------------------------------- Redis (cache)
+  redis:
+    image: redis:7-alpine
+    <<: *restart
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "256mb", "--maxmemory-policy", "allkeys-lru"]
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 10
+    networks: [primetv_net]
+    logging: *logging
+
+  # ---------------------------------------------------------------- API FastAPI
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    <<: *restart
+    env_file: [.env]
+    environment:
+      DATABASE_URL: ${DATABASE_URL:-postgresql+psycopg://primetv:${POSTGRES_PASSWORD}@postgres:5432/primetv}
+      REDIS_URL: ${REDIS_URL:-redis://redis:6379/0}
+      ENV: ${ENV:-production}
+      PUBLIC_BASE_URL: ${PUBLIC_BASE_URL:-http://localhost:8080}
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    expose: ["8000"]
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request,sys; sys.exit(0 if urllib.request.urlopen('http://127.0.0.1:8000/healthz', timeout=5).status==200 else 1)"]
+      interval: 15s
+      timeout: 8s
+      retries: 8
+      start_period: 25s
+    networks: [primetv_net]
+    logging: *logging
+
+  # ---------------------------------------------------------------- Frontend React
+  web:
+    build:
+      context: ./web
+      dockerfile: Dockerfile
+      args:
+        VITE_API_BASE_URL: ${VITE_API_BASE_URL:-/api/v1}
+    <<: *restart
+    expose: ["80"]
+    depends_on:
+      backend:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks: [primetv_net]
+    logging: *logging
+
+  # ---------------------------------------------------------------- Reverse proxy Nginx
+  # Image dédiée (docker/nginx/Dockerfile) : configuration et script de certificat
+  # embarqués → insensible aux permissions de l'hôte et aux fins de ligne CRLF.
+  nginx:
+    build:
+      context: ./docker/nginx
+      dockerfile: Dockerfile
+    image: primetv/nginx:1.0.2
+    <<: *restart
+    volumes:
+      # Seuls les certificats sont persistés sur l'hôte (générés au 1er démarrage).
+      - ./docker/nginx/certs:/etc/nginx/certs
+    environment:
+      PRIMETV_DOMAIN: ${TRAEFIK_DOMAIN:-localhost}
+    ports:
+      - "${HTTP_PORT:-8080}:80"
+      - "${HTTPS_PORT:-8443}:443"
+    depends_on:
+      # `service_healthy` : Nginx résout `backend`/`web` UNE FOIS au démarrage ;
+      # les conteneurs doivent donc exister et répondre avant son lancement.
+      web:
+        condition: service_healthy
+      backend:
+        condition: service_healthy
+    labels:
+      - traefik.enable=true
+      - traefik.http.routers.primetv.rule=Host(`${TRAEFIK_DOMAIN:-primetv.localhost}`)
+      - traefik.http.routers.primetv.entrypoints=websecure
+      - traefik.http.routers.primetv.tls.certresolver=le
+      - traefik.http.routers.primetv.service=primetv
+      - traefik.http.services.primetv.loadbalancer.server.port=80
+      - traefik.http.services.primetv.loadbalancer.server.scheme=http
+      - traefik.docker.network=primetv_net
+    healthcheck:
+      test: ["CMD", "wget", "-qO-", "http://127.0.0.1/nginx-health"]
+      interval: 15s
+      timeout: 5s
+      retries: 5
+    networks: [primetv_net]
+    logging: *logging
+
+  # ---------------------------------------------------------------- Traefik (profil tls, optionnel)
+  traefik:
+    image: traefik:v3.2
+    profiles: ["tls"]
+    <<: *restart
+    command:
+      - --providers.docker=true
+      - --providers.docker.exposedbydefault=false
+      - --providers.docker.network=primetv_net
+      - --providers.file.filename=/etc/traefik/dynamic.yml
+      - --entrypoints.web.address=:80
+      - --entrypoints.websecure.address=:443
+      - --entrypoints.web.http.redirections.entrypoint.to=websecure
+      - --entrypoints.web.http.redirections.entrypoint.scheme=https
+      - --certificatesresolvers.le.acme.email=${TRAEFIK_ACME_EMAIL:-admin@example.com}
+      - --certificatesresolvers.le.acme.storage=/letsencrypt/acme.json
+      - --certificatesresolvers.le.acme.httpchallenge.entrypoint=web
+      - --accesslog=true
+      - --log.level=INFO
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - ./docker/traefik/dynamic.yml:/etc/traefik/dynamic.yml:ro
+      - letsencrypt:/letsencrypt
+    networks: [primetv_net]
+    logging: *logging
+
+volumes:
+  postgres_data:
+  redis_data:
+  letsencrypt:
+
+networks:
+  primetv_net:
+    driver: bridge

@@ -1,0 +1,62 @@
+#EXTM3U
+# =============================================================================
+# PrimeTV — sélection de chaînes PUBLIQUES (free-to-air), légales à recevoir
+# -----------------------------------------------------------------------------
+# Toutes les URLs ci-dessous pointent vers des flux mis en ligne par le
+# diffuseur lui-même (service public ou service international financé par l'État)
+# ou vers un service FAST gratuit financé par la publicité.
+#
+# Aucune chaîne payante, aucun flux piraté, aucun contournement de DRM.
+# Les identifiants `tvg-id` suivent la nomenclature iptv-org (`NomPays.fr`) afin
+# de permettre l'association automatique avec un guide XMLTV compatible.
+#
+# ⚠ Les URLs des diffuseurs changent régulièrement (nouveau CDN, nouvelle
+#   saison, geo-blocage). Après l'import :
+#     1. onglet « Scan & actualisation » → vérifier la disponibilité ;
+#     2. remplacez l'URL d'une chaîne depuis le détail de la chaîne si besoin.
+#   Pour un catalogue maintenu automatiquement, préférez les listes du panneau
+#   « Sources libres » ou https://iptv-org.github.io/iptv/ (voir docs/FREE_SOURCES.md).
+# =============================================================================
+
+# --- Information internationale ----------------------------------------------
+#EXTINF:-1 tvg-id="AlJazeeraEnglish.qa" tvg-name="Al Jazeera English" group-title="Actualités" tvg-language="English" tvg-country="QA",Al Jazeera English
+https://live-hls-web-aje.getaj.net/AJE/index.m3u8
+
+#EXTINF:-1 tvg-id="AlJazeeraArabic.qa" tvg-name="Al Jazeera Arabic" group-title="Actualités" tvg-language="Arabic" tvg-country="QA",الجزيرة
+https://live-hls-web-aja.getaj.net/AJA/index.m3u8
+
+#EXTINF:-1 tvg-id="France24English.fr" tvg-name="France 24 English" group-title="Actualités" tvg-language="English" tvg-country="FR",France 24 English
+https://static.france24.com/live/F24_EN_LO_HLS/live_web.m3u8
+
+#EXTINF:-1 tvg-id="France24French.fr" tvg-name="France 24 Français" group-title="Actualités" tvg-language="French" tvg-country="FR",France 24 Français
+https://static.france24.com/live/F24_FR_LO_HLS/live_web.m3u8
+
+#EXTINF:-1 tvg-id="France24Arabic.fr" tvg-name="France 24 العربية" group-title="Actualités" tvg-language="Arabic" tvg-country="FR",France 24 العربية
+https://static.france24.com/live/F24_AR_LO_HLS/live_web.m3u8
+
+#EXTINF:-1 tvg-id="DWEnglish.de" tvg-name="DW English" group-title="Actualités" tvg-language="English" tvg-country="DE",DW English
+https://dwamdstream102.akamaized.net/hls/live/2015525/dwstream102/index.m3u8
+
+#EXTINF:-1 tvg-id="Tagesschau24.de" tvg-name="Tagesschau 24" group-title="Actualités" tvg-language="German" tvg-country="DE",Tagesschau 24
+https://tagesschau.akamaized.net/hls/live/2020115/tagesschau/tagesschau_1/master.m3u8
+
+# --- Science & découverte ----------------------------------------------------
+#EXTINF:-1 tvg-id="NASATVPublic.us" tvg-name="NASA TV" group-title="Documentaires" tvg-language="English" tvg-country="US",NASA TV
+https://ntv1.akamaized.net/hls/live/2014075/NASA-NTV1-HLS/master.m3u8
+
+# --- Sport & spectacle -------------------------------------------------------
+#EXTINF:-1 tvg-id="RedBullTV.at" tvg-name="Red Bull TV" group-title="Sport" tvg-language="English" tvg-country="AT",Red Bull TV
+https://rbmn-live.akamaized.net/hls/live/590964/BoRB-AT/master.m3u8
+
+# --- Radios publiques --------------------------------------------------------
+#EXTINF:-1 tvg-id="FranceInfoRadio.fr" tvg-name="franceinfo" group-title="Radio — Actualités" tvg-language="French" tvg-country="FR" radio="true",franceinfo (radio)
+https://icecast.radiofrance.fr/franceinfo-midfi.mp3
+
+#EXTINF:-1 tvg-id="FranceInter.fr" tvg-name="France Inter" group-title="Radio — Généraliste" tvg-language="French" tvg-country="FR" radio="true",France Inter (radio)
+https://icecast.radiofrance.fr/franceinter-midfi.mp3
+
+#EXTINF:-1 tvg-id="FranceMusique.fr" tvg-name="France Musique" group-title="Radio — Musique" tvg-language="French" tvg-country="FR" radio="true",France Musique (radio)
+https://icecast.radiofrance.fr/francemusique-midfi.mp3
+
+#EXTINF:-1 tvg-id="FRCulture.fr" tvg-name="France Culture" group-title="Radio — Culture" tvg-language="French" tvg-country="FR" radio="true",France Culture (radio)
+https://icecast.radiofrance.fr/franceculture-midfi.mp3

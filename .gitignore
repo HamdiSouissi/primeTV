@@ -1,0 +1,43 @@
+# ---- Python ----
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+htmlcov/
+.coverage
+.coverage.xml
+
+# ---- Node ----
+node_modules/
+web/dist/
+web/.vite/
+coverage/
+*.tsbuildinfo
+
+# ---- Données locales / secrets ----
+.env
+.env.local
+*.db
+*.db-shm
+*.db-wal
+*.db-journal
+*.sqlite3
+data/
+backups/
+logs/
+*.log
+primetv_local.db
+
+# ---- Divers ----
+.DS_Store
+.idea/
+.vscode/
+*.swp
+
+# Certificats locaux générés automatiquement
+docker/nginx/certs/*
+!docker/nginx/certs/README.md

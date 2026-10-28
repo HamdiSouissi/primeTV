@@ -1,0 +1,48 @@
+# =============================================================================
+# PrimeTV — normalisation des fins de ligne
+# -----------------------------------------------------------------------------
+# Les scripts shell et les fichiers copiés dans des images Linux DOIVENT rester
+# en LF : avec des fins de ligne CRLF (checkout Windows), le noyau lit
+# « #!/bin/sh\r » et échoue avec :
+#   - nginx : « /docker-entrypoint.d/10-primetv-cert.sh: not found »
+#   - Python : « env: use -[v]S to pass options in shebang lines »
+# =============================================================================
+
+# Par défaut : texte normalisé en LF dans le dépôt ET dans le répertoire de travail.
+* text=auto eol=lf
+
+# Scripts exécutables et fichiers destinés aux conteneurs : LF obligatoire.
+*.sh              text eol=lf
+*.bash            text eol=lf
+Dockerfile        text eol=lf
+Dockerfile.*      text eol=lf
+*.dockerfile      text eol=lf
+docker-entrypoint.sh text eol=lf
+*.yml             text eol=lf
+*.yaml            text eol=lf
+*.conf            text eol=lf
+*.json            text eol=lf
+*.md              text eol=lf
+*.py              text eol=lf
+*.ts              text eol=lf
+*.tsx             text eol=lf
+*.css             text eol=lf
+*.html            text eol=lf
+*.sql             text eol=lf
+*.m3u             text eol=lf
+*.xml             text eol=lf
+.env.example      text eol=lf
+
+# Binaires : aucune conversion.
+*.png   binary
+*.jpg   binary
+*.jpeg  binary
+*.gif   binary
+*.ico   binary
+*.webp  binary
+*.pdf   binary
+*.zip   binary
+*.gz    binary
+*.woff  binary
+*.woff2 binary
+*.ttf   binary
